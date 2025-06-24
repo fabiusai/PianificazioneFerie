@@ -486,13 +486,14 @@
             const newAssenza = {
                 id: Date.now(),
                 data: '',
-                tipo: 'ferie', // <-- MODIFICA APPLICATA QUI
+                tipo: 'ferie',
                 fruito: false
             };
             appData.assenze.push(newAssenza);
             renderAll();
         });
 
+        // --- MODIFICA APPLICATA QUI ---
         tableBody.addEventListener('change', (e) => {
             const row = e.target.closest('tr');
             if (!row) return;
@@ -501,13 +502,22 @@
             const assenza = appData.assenze.find(a => a.id === id);
             
             if (e.target.classList.contains('date-input')) {
-                assenza.data = e.target.value;
+                const newDate = e.target.value;
+                
+                // Controlla duplicati solo se la data non è vuota
+                if (newDate && appData.assenze.some(a => a.data === newDate && a.id !== id)) {
+                    alert('Questa data è già stata inserita. Selezionane un\'altra.');
+                    e.target.value = assenza.data; // Ripristina il valore nel campo input
+                    return; // Interrompe l'esecuzione per non salvare il duplicato
+                }
+                assenza.data = newDate;
             } else if (e.target.classList.contains('type-select')) {
                 assenza.tipo = e.target.value;
             } else if (e.target.classList.contains('fruito-check')) {
                 assenza.fruito = e.target.checked;
             }
-            renderAll();
+            
+            renderAll(); // Se arrivo qui, la modifica è valida e aggiorno la UI
         });
         
         tableBody.addEventListener('click', (e) => {
