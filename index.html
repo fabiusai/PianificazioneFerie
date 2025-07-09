@@ -111,6 +111,11 @@
         .summary-box ul {
             list-style-type: none;
             padding: 0;
+            margin-bottom: 15px; /* Aggiunto spazio tra le liste */
+        }
+        
+        .summary-box ul:last-child {
+            margin-bottom: 0;
         }
 
         .summary-box li {
@@ -284,7 +289,8 @@
                 </div>
                 <div class="summary-box">
                     <h3>Giorni di assenza fruiti</h3>
-                    <ul id="summary-fruiti"></ul>
+                    <!-- *** MODIFICA HTML: Cambiato da 'ul' a 'div' per coerenza strutturale *** -->
+                    <div id="summary-fruiti-content"></div>
                 </div>
             </div>
         </div>
@@ -354,7 +360,8 @@
         const totalSpettanzaEl = document.getElementById('total-spettanza');
         const summaryPianificatiEl = document.getElementById('summary-pianificati');
         const summaryResiduiEl = document.getElementById('summary-residui');
-        const summaryFruitiEl = document.getElementById('summary-fruiti');
+        // *** MODIFICA JS: Aggiornato il selettore per il nuovo div ***
+        const summaryFruitiContentEl = document.getElementById('summary-fruiti-content');
         const addRowBtn = document.getElementById('add-row-btn');
         const tableBody = document.getElementById('absence-table-body');
         const tableHeaders = document.querySelectorAll('th[data-sort]');
@@ -391,6 +398,9 @@
             totalSpettanzaEl.textContent = total;
         }
         
+        // ======================================================================================
+        // --- INIZIO BLOCCO MODIFICATO ---
+        // ======================================================================================
         function renderSummary() {
             const pianificati = {}, fruiti = {};
             for (const key in tipiAssenza) {
@@ -407,30 +417,53 @@
 
             const totalPianificati = Object.values(pianificati).reduce((a, b) => a + b, 0);
             const totalFruiti = Object.values(fruiti).reduce((a, b) => a + b, 0);
+            const totalSpettanze = Object.values(appData.spettanze).reduce((a, b) => a + Number(b), 0);
 
-            let pianificatiHTML = '<ul>';
-            let residuiHTML = '<ul>';
+            // --- Blocco 1: Pianificati e Residui da Pianificare (invariato) ---
+            let pianificatiHTML = '';
+            for (const key in tipiAssenza) {
+                pianificatiHTML += `<li><span>${tipiAssenza[key]}</span> <span>${pianificati[key]}</span></li>`;
+            }
+            pianificatiHTML += `<li class="total"><span>Totale Pianificati</span> <span>${totalPianificati}</span></li>`;
+            summaryPianificatiEl.innerHTML = pianificatiHTML;
+            
+            let residuiPianificareHTML = '<ul>';
             for (const key in tipiAssenza) {
                 const residuo = appData.spettanze[key] - pianificati[key];
                 const residuoClass = residuo < 0 ? 'class="negative"' : '';
-                pianificatiHTML += `<li><span>${tipiAssenza[key]}</span> <span>${pianificati[key]}</span></li>`;
-                residuiHTML += `<li><span>Residuo ${tipiAssenza[key]}</span> <span ${residuoClass}>${residuo}</span></li>`;
+                residuiPianificareHTML += `<li><span>Residuo ${tipiAssenza[key]}</span> <span ${residuoClass}>${residuo}</span></li>`;
             }
-            const totalResiduo = Object.values(appData.spettanze).reduce((a, b) => a + Number(b), 0) - totalPianificati;
-            const totalResiduoClass = totalResiduo < 0 ? 'class="negative"' : '';
-            
-            pianificatiHTML += `<li class="total"><span>Totale Pianificati</span> <span>${totalPianificati}</span></li></ul>`;
-            residuiHTML += `<li class="total"><span>Totale Residuo</span> <span ${totalResiduoClass}>${totalResiduo}</span></li></ul>`;
-            summaryPianificatiEl.innerHTML = pianificatiHTML;
-            summaryResiduiEl.innerHTML = residuiHTML;
+            const totalResiduoPianificare = totalSpettanze - totalPianificati;
+            const totalResiduoPianificareClass = totalResiduoPianificare < 0 ? 'class="negative"' : '';
+            residuiPianificareHTML += `<li class="total"><span>Totale Residuo da pianificare</span> <span ${totalResiduoPianificareClass}>${totalResiduoPianificare}</span></li></ul>`;
+            summaryResiduiEl.innerHTML = residuiPianificareHTML;
 
-            let fruitiHTML = '<ul>';
+
+            // --- Blocco 2: Fruiti e Residui da Fruire (modificato per dettaglio) ---
+            // Lista 1: Dettaglio giorni fruiti
+            let fruitiBreakdownHTML = '<ul>';
             for (const key in tipiAssenza) {
-                fruitiHTML += `<li><span>${tipiAssenza[key]}</span> <span>${fruiti[key]}</span></li>`;
+                fruitiBreakdownHTML += `<li><span>${tipiAssenza[key]}</span> <span>${fruiti[key]}</span></li>`;
             }
-            fruitiHTML += `<li class="total"><span>Totale Fruiti</span> <span>${totalFruiti}</span></li></ul>`;
-            summaryFruitiEl.innerHTML = fruitiHTML;
+            fruitiBreakdownHTML += `<li class="total"><span>Totale Fruiti</span> <span>${totalFruiti}</span></li></ul>`;
+
+            // Lista 2: Dettaglio residui da fruire
+            let residuiFruireHTML = '<ul>';
+            for (const key in tipiAssenza) {
+                const residuoFruire = appData.spettanze[key] - fruiti[key];
+                const residuoClass = residuoFruire < 0 ? 'class="negative"' : '';
+                residuiFruireHTML += `<li><span>Residuo ${tipiAssenza[key]}</span> <span ${residuoClass}>${residuoFruire}</span></li>`;
+            }
+            const totalResiduoFruire = totalSpettanze - totalFruiti;
+            const totalResiduoFruireClass = totalResiduoFruire < 0 ? 'class="negative"' : '';
+            residuiFruireHTML += `<li class="total"><span>Totale Residuo da fruire</span> <span ${totalResiduoFruireClass}>${totalResiduoFruire}</span></li></ul>`;
+            
+            // Inserisce entrambe le liste nel contenitore
+            summaryFruitiContentEl.innerHTML = fruitiBreakdownHTML + residuiFruireHTML;
         }
+        // ======================================================================================
+        // --- FINE BLOCCO MODIFICATO ---
+        // ======================================================================================
 
         function renderTable() {
             tableBody.innerHTML = '';
@@ -533,7 +566,6 @@
                     Tipologia: assenza.tipo ? tipiAssenza[assenza.tipo] : '',
                     Fruito: assenza.fruito ? 'Si' : 'No'
                 }));
-                // MODIFICA CHIAVE: Aggiunta opzione { cellDates: true } per un handling corretto delle date
                 const pianificazioneSheet = XLSX.utils.json_to_sheet(pianificazioneData, { cellDates: true });
 
                 // Applica il formato data gg/mm/aaaa alla colonna 'A'
@@ -563,7 +595,6 @@
                 XLSX.writeFile(wb, "consuntivazione_assenze.xlsx");
 
             } catch(error) {
-                // MODIFICA CHIAVE: Aggiunto un blocco try-catch per mostrare errori all'utente
                 console.error("Errore durante l'esportazione:", error);
                 alert("Si è verificato un errore durante la creazione del file Excel. Controlla la console per maggiori dettagli.");
             }
