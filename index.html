@@ -230,7 +230,6 @@
             background-color: #5a6268;
         }
         
-        /* *** NUOVO STILE PER IL PULSANTE RESET *** */
         .btn-danger {
             background-color: #dc3545;
         }
@@ -331,7 +330,6 @@
             <div class="data-management">
                 <button id="export-excel-btn" class="btn btn-secondary">Esporta Excel</button>
                 <button id="import-excel-btn" class="btn btn-secondary">Importa Excel</button>
-                <!-- *** NUOVO PULSANTE RESET *** -->
                 <button id="reset-data-btn" class="btn btn-danger">Resetta Pianificazione</button>
                 <input type="file" id="import-file-input" accept=".xlsx, .xls">
             </div>
@@ -379,7 +377,6 @@
         const exportBtn = document.getElementById('export-excel-btn');
         const importBtn = document.getElementById('import-excel-btn');
         const importFileInput = document.getElementById('import-file-input');
-        // *** RIFERIMENTO AL NUOVO PULSANTE ***
         const resetBtn = document.getElementById('reset-data-btn');
         
         // --- FUNZIONI PRINCIPALI ---
@@ -559,11 +556,10 @@
             });
         });
         
-        // *** NUOVO GESTORE EVENTI PER IL RESET ***
         resetBtn.addEventListener('click', () => {
             if (confirm("Sei sicuro di voler eliminare tutti i giorni di assenza pianificati e fruiti? I valori di spettanza non verranno modificati. L'azione è irreversibile.")) {
-                appData.assenze = []; // Resetta solo l'array delle assenze
-                renderAll(); // Riesegue il rendering per aggiornare la UI e salvare i dati
+                appData.assenze = [];
+                renderAll();
                 alert('La pianificazione è stata resettata.');
             }
         });
@@ -571,7 +567,6 @@
         // --- GESTIONE DATI EXCEL ---
         exportBtn.addEventListener('click', () => {
             try {
-                // 1. Dati per il foglio "Pianificazione"
                 const pianificazioneData = appData.assenze.map(assenza => ({
                     Data: assenza.data ? new Date(assenza.data) : null, 
                     Giorno: assenza.data ? getDayOfWeek(assenza.data) : '',
@@ -584,13 +579,12 @@
                     const range = XLSX.utils.decode_range(pianificazioneSheet['!ref']);
                     for (let i = range.s.r + 1; i <= range.e.r; ++i) {
                         const cell_ref = XLSX.utils.encode_cell({ c: 0, r: i });
-                        if (pianificazioneSheet[cell_ref]) {
+                        if (pianificazioneSheet[cell_ref] && pianificazioneSheet[cell_ref].t === 'd') { // Controlla se è una data
                             pianificazioneSheet[cell_ref].z = 'dd/mm/yyyy';
                         }
                     }
                 }
 
-                // 2. Dati per il foglio "Spettanze"
                 const spettanzeData = Object.entries(appData.spettanze).map(([key, value]) => ({
                     'Tipologia di Spettanza': tipiAssenza[key],
                     'Giorni': value
@@ -647,11 +641,20 @@
 
                     const newAssenze = pianificazioneJson.map((row, index) => {
                         let dataValue = '';
-                        if (row.Data instanceof Date) {
+                        // ======================================================================================
+                        // --- INIZIO BLOCCO MODIFICATO PER CORREZIONE DATA ---
+                        // ======================================================================================
+                        // Controlla che la data esista e sia un oggetto Date valido
+                        if (row.Data instanceof Date && !isNaN(row.Data)) {
                             const date = row.Data;
-                            date.setMinutes(date.getMinutes() + date.getTimezoneOffset());
+                            // Correzione fuso orario: l'offset viene sottratto per neutralizzare 
+                            // la conversione automatica del browser e mantenere la data originale del file.
+                            date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
                             dataValue = date.toISOString().split('T')[0];
                         }
+                        // ======================================================================================
+                        // --- FINE BLOCCO MODIFICATO ---
+                        // ======================================================================================
                         
                         return {
                             id: Date.now() + index,
@@ -659,7 +662,7 @@
                             tipo: tipiAssenzaReverse[row.Tipologia] || '',
                             fruito: String(row.Fruito).toLowerCase() === 'si'
                         }
-                    });
+                    }).filter(a => a.data); // Filtra eventuali righe senza una data valida
                     appData.assenze = newAssenze;
 
                     renderAll();
