@@ -229,9 +229,20 @@
         .btn-secondary:hover {
             background-color: #5a6268;
         }
+        
+        /* *** NUOVO STILE PER IL PULSANTE RESET *** */
+        .btn-danger {
+            background-color: #dc3545;
+        }
+        .btn-danger:hover {
+            background-color: #c82333;
+        }
 
         .data-management {
             margin-top: 20px;
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
         }
         
         #import-file-input {
@@ -289,7 +300,6 @@
                 </div>
                 <div class="summary-box">
                     <h3>Giorni di assenza fruiti</h3>
-                    <!-- *** MODIFICA HTML: Cambiato da 'ul' a 'div' per coerenza strutturale *** -->
                     <div id="summary-fruiti-content"></div>
                 </div>
             </div>
@@ -321,6 +331,8 @@
             <div class="data-management">
                 <button id="export-excel-btn" class="btn btn-secondary">Esporta Excel</button>
                 <button id="import-excel-btn" class="btn btn-secondary">Importa Excel</button>
+                <!-- *** NUOVO PULSANTE RESET *** -->
+                <button id="reset-data-btn" class="btn btn-danger">Resetta Pianificazione</button>
                 <input type="file" id="import-file-input" accept=".xlsx, .xls">
             </div>
         </div>
@@ -360,7 +372,6 @@
         const totalSpettanzaEl = document.getElementById('total-spettanza');
         const summaryPianificatiEl = document.getElementById('summary-pianificati');
         const summaryResiduiEl = document.getElementById('summary-residui');
-        // *** MODIFICA JS: Aggiornato il selettore per il nuovo div ***
         const summaryFruitiContentEl = document.getElementById('summary-fruiti-content');
         const addRowBtn = document.getElementById('add-row-btn');
         const tableBody = document.getElementById('absence-table-body');
@@ -368,6 +379,8 @@
         const exportBtn = document.getElementById('export-excel-btn');
         const importBtn = document.getElementById('import-excel-btn');
         const importFileInput = document.getElementById('import-file-input');
+        // *** RIFERIMENTO AL NUOVO PULSANTE ***
+        const resetBtn = document.getElementById('reset-data-btn');
         
         // --- FUNZIONI PRINCIPALI ---
         function initializeApp() {
@@ -398,9 +411,6 @@
             totalSpettanzaEl.textContent = total;
         }
         
-        // ======================================================================================
-        // --- INIZIO BLOCCO MODIFICATO ---
-        // ======================================================================================
         function renderSummary() {
             const pianificati = {}, fruiti = {};
             for (const key in tipiAssenza) {
@@ -419,7 +429,7 @@
             const totalFruiti = Object.values(fruiti).reduce((a, b) => a + b, 0);
             const totalSpettanze = Object.values(appData.spettanze).reduce((a, b) => a + Number(b), 0);
 
-            // --- Blocco 1: Pianificati e Residui da Pianificare (invariato) ---
+            // Blocco 1: Pianificati e Residui da Pianificare
             let pianificatiHTML = '';
             for (const key in tipiAssenza) {
                 pianificatiHTML += `<li><span>${tipiAssenza[key]}</span> <span>${pianificati[key]}</span></li>`;
@@ -438,16 +448,13 @@
             residuiPianificareHTML += `<li class="total"><span>Totale Residuo da pianificare</span> <span ${totalResiduoPianificareClass}>${totalResiduoPianificare}</span></li></ul>`;
             summaryResiduiEl.innerHTML = residuiPianificareHTML;
 
-
-            // --- Blocco 2: Fruiti e Residui da Fruire (modificato per dettaglio) ---
-            // Lista 1: Dettaglio giorni fruiti
+            // Blocco 2: Fruiti e Residui da Fruire
             let fruitiBreakdownHTML = '<ul>';
             for (const key in tipiAssenza) {
                 fruitiBreakdownHTML += `<li><span>${tipiAssenza[key]}</span> <span>${fruiti[key]}</span></li>`;
             }
             fruitiBreakdownHTML += `<li class="total"><span>Totale Fruiti</span> <span>${totalFruiti}</span></li></ul>`;
 
-            // Lista 2: Dettaglio residui da fruire
             let residuiFruireHTML = '<ul>';
             for (const key in tipiAssenza) {
                 const residuoFruire = appData.spettanze[key] - fruiti[key];
@@ -458,12 +465,8 @@
             const totalResiduoFruireClass = totalResiduoFruire < 0 ? 'class="negative"' : '';
             residuiFruireHTML += `<li class="total"><span>Totale Residuo da fruire</span> <span ${totalResiduoFruireClass}>${totalResiduoFruire}</span></li></ul>`;
             
-            // Inserisce entrambe le liste nel contenitore
             summaryFruitiContentEl.innerHTML = fruitiBreakdownHTML + residuiFruireHTML;
         }
-        // ======================================================================================
-        // --- FINE BLOCCO MODIFICATO ---
-        // ======================================================================================
 
         function renderTable() {
             tableBody.innerHTML = '';
@@ -555,8 +558,17 @@
                 renderAll();
             });
         });
+        
+        // *** NUOVO GESTORE EVENTI PER IL RESET ***
+        resetBtn.addEventListener('click', () => {
+            if (confirm("Sei sicuro di voler eliminare tutti i giorni di assenza pianificati e fruiti? I valori di spettanza non verranno modificati. L'azione è irreversibile.")) {
+                appData.assenze = []; // Resetta solo l'array delle assenze
+                renderAll(); // Riesegue il rendering per aggiornare la UI e salvare i dati
+                alert('La pianificazione è stata resettata.');
+            }
+        });
 
-        // --- GESTIONE DATI EXCEL (ULTIMA VERSIONE CORRETTA) ---
+        // --- GESTIONE DATI EXCEL ---
         exportBtn.addEventListener('click', () => {
             try {
                 // 1. Dati per il foglio "Pianificazione"
@@ -568,7 +580,6 @@
                 }));
                 const pianificazioneSheet = XLSX.utils.json_to_sheet(pianificazioneData, { cellDates: true });
 
-                // Applica il formato data gg/mm/aaaa alla colonna 'A'
                 if (appData.assenze.length > 0) {
                     const range = XLSX.utils.decode_range(pianificazioneSheet['!ref']);
                     for (let i = range.s.r + 1; i <= range.e.r; ++i) {
@@ -586,12 +597,10 @@
                 }));
                 const spettanzeSheet = XLSX.utils.json_to_sheet(spettanzeData);
                 
-                // 3. Creazione del Workbook
                 const wb = XLSX.utils.book_new();
                 XLSX.utils.book_append_sheet(wb, pianificazioneSheet, "Pianificazione");
                 XLSX.utils.book_append_sheet(wb, spettanzeSheet, "Spettanze");
 
-                // 4. Download del file
                 XLSX.writeFile(wb, "consuntivazione_assenze.xlsx");
 
             } catch(error) {
@@ -640,7 +649,6 @@
                         let dataValue = '';
                         if (row.Data instanceof Date) {
                             const date = row.Data;
-                            // Correzione fuso orario per evitare che la data scali indietro di un giorno
                             date.setMinutes(date.getMinutes() + date.getTimezoneOffset());
                             dataValue = date.toISOString().split('T')[0];
                         }
@@ -670,7 +678,6 @@
         // --- FUNZIONI DI UTILITÀ ---
         function getDayOfWeek(dateString) {
             if (!dateString) return '';
-            // Correzione per gestire correttamente il giorno della settimana senza problemi di fuso orario
             const [year, month, day] = dateString.split('-').map(Number);
             const date = new Date(year, month - 1, day);
             const dayName = date.toLocaleDateString('it-IT', { weekday: 'long' });
