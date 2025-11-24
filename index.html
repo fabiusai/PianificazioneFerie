@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Piano Ferie Smart</title>
+    <title>Piano Ferie Smart - Interactive Calendar</title>
     <link rel="icon" href="favicon.ico">
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
@@ -15,275 +15,116 @@
             --secondary: #64748b;
             --success: #22c55e;
             --danger: #ef4444;
-            --warning: #f59e0b;
+            --warning: #f97316;
             --bg-body: #f1f5f9;
             --bg-card: #ffffff;
             --text-main: #1e293b;
             --text-muted: #64748b;
             --border: #e2e8f0;
             --radius: 12px;
-            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1);
         }
 
-        body {
-            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
-            background-color: var(--bg-body);
-            color: var(--text-main);
-            margin: 0;
-            padding: 20px;
-            line-height: 1.5;
-        }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg-body); color: var(--text-main); margin: 0; padding: 20px; line-height: 1.5; }
+        .container { max-width: 1200px; margin: 0 auto; }
 
-        .container {
-            max-width: 1200px;
-            margin: 0 auto;
-        }
+        /* HEADER & TABS */
+        header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; flex-wrap: wrap; gap: 15px; }
+        h1 { font-size: 1.8rem; color: var(--primary-dark); margin: 0; display: flex; gap: 10px; align-items: center; }
+        .year-tabs { display: flex; background: #e2e8f0; padding: 4px; border-radius: var(--radius); }
+        .year-tab { padding: 8px 24px; border: none; background: transparent; cursor: pointer; border-radius: 8px; font-weight: 600; color: var(--text-muted); transition: all 0.2s; }
+        .year-tab.active { background: var(--bg-card); color: var(--primary); box-shadow: 0 1px 3px rgba(0,0,0,0.1); }
 
-        /* --- Header & Tabs --- */
-        header {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-            gap: 15px;
-        }
+        /* LAYOUT */
+        .main-grid { display: grid; grid-template-columns: 300px 1fr; gap: 24px; }
+        @media (max-width: 900px) { .main-grid { grid-template-columns: 1fr; } }
+        .card { background: var(--bg-card); border-radius: var(--radius); box-shadow: var(--shadow); padding: 20px; margin-bottom: 24px; border: 1px solid var(--border); }
+        .card h2 { font-size: 1.1rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.5px; margin-top: 0; margin-bottom: 15px; border-bottom: 2px solid var(--bg-body); padding-bottom: 10px; }
 
-        h1 {
-            font-size: 1.8rem;
-            color: var(--primary-dark);
-            margin: 0;
-            display: flex;
-            align-items: center;
-            gap: 10px;
-        }
-
-        .year-tabs {
-            display: flex;
-            background: #e2e8f0;
-            padding: 4px;
-            border-radius: var(--radius);
-        }
-
-        .year-tab {
-            padding: 8px 24px;
-            border: none;
-            background: transparent;
-            cursor: pointer;
-            border-radius: 8px;
-            font-weight: 600;
-            color: var(--text-muted);
-            transition: all 0.2s;
-        }
-
-        .year-tab.active {
-            background: var(--bg-card);
-            color: var(--primary);
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
-        }
-
-        /* --- Grid Layout --- */
-        .main-grid {
-            display: grid;
-            grid-template-columns: 300px 1fr;
-            gap: 24px;
-        }
-
-        @media (max-width: 900px) {
-            .main-grid { grid-template-columns: 1fr; }
-        }
-
-        /* --- Cards --- */
-        .card {
-            background: var(--bg-card);
-            border-radius: var(--radius);
-            box-shadow: var(--shadow);
-            padding: 20px;
-            margin-bottom: 24px;
-            border: 1px solid var(--border);
-        }
-
-        .card h2 {
-            font-size: 1.1rem;
-            color: var(--text-muted);
-            text-transform: uppercase;
-            letter-spacing: 0.5px;
-            margin-top: 0;
-            margin-bottom: 15px;
-            border-bottom: 2px solid var(--bg-body);
-            padding-bottom: 10px;
-        }
-
-        /* --- Spettanze Inputs --- */
-        .spettanza-row {
-            display: flex;
-            justify-content: space-between;
-            align-items: center;
-            margin-bottom: 12px;
-        }
-
-        .spettanza-row input {
-            width: 70px;
-            padding: 6px;
-            border: 1px solid var(--border);
-            border-radius: 6px;
-            text-align: center;
-            font-weight: bold;
-            color: var(--primary);
-        }
-
-        /* --- Summary Dashboard --- */
-        .summary-item {
-            display: flex;
-            justify-content: space-between;
-            margin-bottom: 8px;
-            font-size: 0.95rem;
-        }
-
-        .summary-item.total {
-            font-weight: bold;
-            border-top: 1px dashed var(--border);
-            padding-top: 8px;
-            margin-top: 8px;
-            color: var(--primary-dark);
-        }
-
-        .badge-residuo {
-            padding: 2px 8px;
-            border-radius: 12px;
-            font-size: 0.85rem;
-            font-weight: bold;
-        }
+        /* COMPONENTS */
+        .spettanza-row { display: flex; justify-content: space-between; margin-bottom: 12px; align-items: center; }
+        .spettanza-row input { width: 70px; padding: 6px; border: 1px solid var(--border); border-radius: 6px; text-align: center; font-weight: bold; color: var(--primary); }
+        .summary-item { display: flex; justify-content: space-between; margin-bottom: 8px; font-size: 0.95rem; }
+        .summary-item.total { font-weight: bold; border-top: 1px dashed var(--border); padding-top: 8px; margin-top: 8px; color: var(--primary-dark); }
+        .badge-residuo { padding: 2px 8px; border-radius: 12px; font-size: 0.85rem; font-weight: bold; }
         .bg-ok { background-color: #dcfce7; color: #166534; }
         .bg-warn { background-color: #fee2e2; color: #991b1b; }
 
-        /* --- Input Bar (New Record) --- */
-        .input-bar {
-            display: flex;
-            gap: 10px;
-            background: #f8fafc;
-            padding: 15px;
-            border-radius: var(--radius);
-            border: 1px dashed var(--primary);
-            align-items: end;
-            margin-bottom: 20px;
-            flex-wrap: wrap;
-        }
-
-        .input-group {
-            display: flex;
-            flex-direction: column;
-            gap: 5px;
-            flex: 1;
-            min-width: 150px;
-        }
-
-        .input-group label {
-            font-size: 0.8rem;
-            font-weight: 600;
-            color: var(--text-muted);
-        }
-
-        .input-group input, .input-group select {
-            padding: 10px;
-            border: 1px solid var(--border);
-            border-radius: 8px;
-            font-size: 1rem;
-        }
-
-        .btn-add {
-            background-color: var(--primary);
-            color: white;
-            padding: 10px 20px;
-            border: none;
-            border-radius: 8px;
-            cursor: pointer;
-            font-weight: 600;
-            height: 45px;
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            transition: background 0.2s;
-        }
+        .input-bar { display: flex; gap: 10px; background: #f8fafc; padding: 15px; border-radius: var(--radius); border: 1px dashed var(--primary); align-items: end; margin-bottom: 20px; flex-wrap: wrap; }
+        .input-group { display: flex; flex-direction: column; gap: 5px; flex: 1; min-width: 150px; }
+        .input-group label { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); }
+        .input-group input, .input-group select { padding: 10px; border: 1px solid var(--border); border-radius: 8px; font-size: 1rem; }
+        .btn-add { background-color: var(--primary); color: white; padding: 10px 20px; border: none; border-radius: 8px; cursor: pointer; font-weight: 600; height: 45px; display: flex; align-items: center; gap: 8px; transition: background 0.2s; }
         .btn-add:disabled { background-color: #cbd5e1; cursor: not-allowed; }
-        .btn-add:hover:not(:disabled) { background-color: var(--primary-dark); }
 
-        /* --- Table --- */
-        .table-wrapper {
-            overflow-x: auto;
-        }
-        table {
-            width: 100%;
-            border-collapse: collapse;
-        }
-        th {
-            text-align: left;
-            padding: 12px;
-            color: var(--text-muted);
-            font-size: 0.85rem;
-            border-bottom: 2px solid var(--border);
-        }
-        td {
-            padding: 12px;
-            border-bottom: 1px solid var(--border);
-            vertical-align: middle;
-        }
-        tr:hover td { background-color: #f8fafc; }
+        .view-controls { display: flex; gap: 10px; margin-bottom: 15px; border-bottom: 1px solid var(--border); padding-bottom: 15px; }
+        .btn-view { background: transparent; border: 1px solid var(--border); padding: 8px 16px; border-radius: 6px; cursor: pointer; color: var(--text-muted); font-weight: 600; display: flex; align-items: center; gap: 8px; }
+        .btn-view.active { background: var(--primary); color: white; border-color: var(--primary); }
 
-        .status-toggle {
-            cursor: pointer;
-            font-size: 1.2rem;
-            color: var(--border);
-            transition: color 0.2s;
-        }
+        /* TABLE */
+        .table-wrapper { overflow-x: auto; }
+        table { width: 100%; border-collapse: collapse; }
+        th { text-align: left; padding: 12px; color: var(--text-muted); font-size: 0.85rem; border-bottom: 2px solid var(--border); }
+        td { padding: 12px; border-bottom: 1px solid var(--border); vertical-align: middle; }
+        .status-toggle { cursor: pointer; font-size: 1.2rem; color: var(--border); transition: color 0.2s; }
         .status-toggle.active { color: var(--success); }
-
-        .btn-del {
-            background: transparent;
-            border: none;
-            color: var(--text-muted);
-            cursor: pointer;
-            padding: 5px;
-            transition: color 0.2s;
-        }
+        .btn-del { background: transparent; border: none; color: var(--text-muted); cursor: pointer; padding: 5px; }
         .btn-del:hover { color: var(--danger); }
 
-        /* --- Footer Actions --- */
-        .actions-bar {
-            margin-top: 30px;
-            padding-top: 20px;
-            border-top: 1px solid var(--border);
-            display: flex;
-            gap: 10px;
-            flex-wrap: wrap;
+        /* CALENDAR */
+        .calendar-container { display: none; }
+        .calendar-container.visible { display: block; }
+        .cal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 20px; background: var(--bg-body); padding: 10px; border-radius: 8px; }
+        .cal-nav-btn { background: white; border: 1px solid var(--border); width: 32px; height: 32px; border-radius: 50%; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+        .cal-title { font-weight: bold; font-size: 1.2rem; color: var(--primary-dark); }
+        .cal-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; }
+        .cal-day-header { text-align: center; font-weight: bold; color: var(--text-muted); font-size: 0.9rem; padding-bottom: 10px; }
+        
+        .cal-day {
+            aspect-ratio: 1; border-radius: 8px; border: 1px solid var(--border);
+            background: #f8fafc; display: flex; flex-direction: column;
+            justify-content: center; align-items: center; position: relative;
+            font-size: 0.9rem; color: #94a3b8; cursor: pointer; transition: transform 0.1s, border-color 0.2s;
         }
+        .cal-day:hover { border-color: var(--primary); transform: scale(1.02); z-index: 2; box-shadow: 0 4px 12px rgba(0,0,0,0.1); }
+        .cal-day.weekend { background-color: #fef2f2; color: #ef4444; opacity: 0.7; cursor: default; }
+        .cal-day.weekend:hover { transform: none; border-color: var(--border); box-shadow: none; }
+        .cal-day.festivity { background-color: #fee2e2; color: #b91c1c; font-weight: bold; border-color: #fca5a5; cursor: default; }
+        .cal-day.festivity:hover { transform: none; border-color: #fca5a5; box-shadow: none; }
+        
+        .cal-day.planned { background-color: #fff7ed; border-color: var(--warning); color: var(--warning); font-weight: bold; }
+        .cal-day.taken { background-color: #f0fdf4; border-color: var(--success); color: var(--success); font-weight: bold; }
+        
+        .cal-day .day-num { font-size: 1.1rem; margin-bottom: 4px; pointer-events: none; }
+        .cal-day .day-type { font-size: 0.65rem; text-transform: uppercase; text-align: center; line-height: 1.1; max-width: 90%; pointer-events: none; }
 
-        .btn {
-            padding: 8px 16px;
-            border-radius: 6px;
-            border: 1px solid var(--border);
-            background: white;
-            cursor: pointer;
-            font-size: 0.9rem;
-            display: flex;
-            align-items: center;
-            gap: 6px;
-            transition: all 0.2s;
+        .cal-legend { display: flex; gap: 20px; margin-top: 20px; font-size: 0.85rem; justify-content: center; }
+        .legend-item { display: flex; align-items: center; gap: 6px; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; }
+
+        /* MODAL */
+        .modal-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.5); display: none; justify-content: center; align-items: center; z-index: 1000;
         }
+        .modal-box {
+            background: white; padding: 25px; border-radius: var(--radius); width: 90%; max-width: 400px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.2); animation: slideIn 0.2s ease-out;
+        }
+        @keyframes slideIn { from { transform: translateY(20px); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+        
+        .modal-header { font-size: 1.2rem; font-weight: bold; margin-bottom: 20px; color: var(--primary-dark); display: flex; justify-content: space-between; align-items: center; }
+        .modal-actions { display: flex; gap: 10px; margin-top: 20px; justify-content: flex-end; }
+        
+        /* FOOTER */
+        .actions-bar { margin-top: 30px; padding-top: 20px; border-top: 1px solid var(--border); display: flex; gap: 10px; flex-wrap: wrap; }
+        .btn { padding: 8px 16px; border-radius: 6px; border: 1px solid var(--border); background: white; cursor: pointer; font-size: 0.9rem; display: flex; align-items: center; gap: 6px; }
         .btn:hover { background: #f1f5f9; }
-        .btn-outline-danger { color: var(--danger); border-color: var(--danger); }
-        .btn-outline-danger:hover { background: #fef2f2; }
-
-        /* --- Config Modal --- */
-        .year-config {
-            display: flex;
-            align-items: center;
-            gap: 10px;
-            margin-bottom: 20px;
-            background: #fff;
-            padding: 10px;
-            border-radius: 8px;
-        }
+        .btn-primary { background: var(--primary); color: white; border: none; }
+        .btn-primary:hover { background: var(--primary-dark); }
+        .btn-danger { background: var(--danger); color: white; border: none; }
+        .btn-danger:hover { background: #dc2626; }
+        .year-config { display: flex; align-items: center; gap: 10px; margin-bottom: 20px; background: #fff; padding: 10px; border-radius: 8px; }
     </style>
 </head>
 <body>
@@ -291,12 +132,11 @@
     <div class="container">
         <header>
             <h1><i class="fa-solid fa-plane-departure"></i> Piano Ferie</h1>
-            <div class="year-tabs" id="year-tabs-container">
-                </div>
+            <div class="year-tabs" id="year-tabs-container"></div>
         </header>
 
         <div class="year-config" id="config-area">
-            <label>Anno di Riferimento (Start):</label>
+            <label>Anno Start:</label>
             <input type="number" id="base-year-input" style="width: 80px; padding: 5px;" min="2020" max="2050">
             <button class="btn" id="update-year-btn">Aggiorna</button>
         </div>
@@ -305,8 +145,7 @@
             <aside>
                 <div class="card">
                     <h2><i class="fa-solid fa-scale-balanced"></i> Spettanze <span id="lbl-active-year"></span></h2>
-                    <div id="spettanze-container">
-                        </div>
+                    <div id="spettanze-container"></div>
                     <div class="summary-item total">
                         <span>Totale Disponibile</span>
                         <span id="total-spettanze">0</span>
@@ -315,18 +154,33 @@
 
                 <div class="card">
                     <h2><i class="fa-solid fa-chart-pie"></i> Riepilogo</h2>
-                    <div id="summary-dashboard">
-                        </div>
+                    <div id="summary-dashboard"></div>
                 </div>
             </aside>
 
             <main>
                 <div class="card">
                     <h2><i class="fa-solid fa-calendar-plus"></i> Nuova Pianificazione</h2>
+                    
+                    <div style="margin-bottom: 15px; display: flex; gap: 15px; font-size: 0.9rem;">
+                        <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                            <input type="radio" name="insert-mode" value="single" checked onchange="toggleMode()"> 
+                            Giorno Singolo
+                        </label>
+                        <label style="cursor: pointer; display: flex; align-items: center; gap: 5px;">
+                            <input type="radio" name="insert-mode" value="range" onchange="toggleMode()"> 
+                            Periodo (da A a B)
+                        </label>
+                    </div>
+
                     <div class="input-bar">
                         <div class="input-group">
-                            <label>Data</label>
-                            <input type="date" id="new-date">
+                            <label id="lbl-date-start">Data</label>
+                            <input type="date" id="new-date-start">
+                        </div>
+                        <div class="input-group" id="group-date-end" style="display: none;">
+                            <label>Fino al (incluso)</label>
+                            <input type="date" id="new-date-end">
                         </div>
                         <div class="input-group">
                             <label>Tipologia</label>
@@ -342,25 +196,58 @@
                         </button>
                     </div>
                     <div id="validation-msg" style="color: var(--danger); font-size: 0.9rem; margin-top: -15px; margin-bottom: 15px; display: none;"></div>
+                    <div id="success-msg" style="color: var(--success); font-weight:bold; font-size: 0.9rem; margin-top: -15px; margin-bottom: 15px; display: none;"></div>
 
-                    <h2><i class="fa-solid fa-list-check"></i> Elenco Assenze</h2>
-                    <div class="table-wrapper">
-                        <table>
-                            <thead>
-                                <tr>
-                                    <th>Data</th>
-                                    <th>Giorno</th>
-                                    <th>Tipo</th>
-                                    <th style="text-align: center">Fruito</th>
-                                    <th style="text-align: right">Azioni</th>
-                                </tr>
-                            </thead>
-                            <tbody id="table-body">
-                                </tbody>
-                        </table>
+                    <div style="display: flex; justify-content: space-between; align-items: center; border-bottom: 1px solid #e2e8f0; margin-bottom: 20px;">
+                        <h2 style="border: none; margin: 0; padding: 0;"><i class="fa-solid fa-layer-group"></i> Visualizzazione</h2>
+                        <div class="view-controls" style="border: none; margin: 0; padding: 0;">
+                            <button class="btn-view active" id="view-list-btn" onclick="switchView('list')"><i class="fa-solid fa-list"></i> Elenco</button>
+                            <button class="btn-view" id="view-cal-btn" onclick="switchView('calendar')"><i class="fa-solid fa-calendar-days"></i> Calendario</button>
+                        </div>
                     </div>
-                    <div id="empty-state" style="text-align: center; padding: 40px; color: var(--text-muted); display: none;">
-                        Nessuna assenza pianificata per questo anno.
+
+                    <div id="list-view-container">
+                        <div class="table-wrapper">
+                            <table>
+                                <thead>
+                                    <tr>
+                                        <th>Data</th>
+                                        <th>Giorno</th>
+                                        <th>Tipo</th>
+                                        <th style="text-align: center">Fruito</th>
+                                        <th style="text-align: right">Azioni</th>
+                                    </tr>
+                                </thead>
+                                <tbody id="table-body"></tbody>
+                            </table>
+                        </div>
+                        <div id="empty-state" style="text-align: center; padding: 40px; color: var(--text-muted); display: none;">
+                            Nessuna assenza pianificata per questo anno.
+                        </div>
+                    </div>
+
+                    <div id="calendar-view-container" class="calendar-container">
+                        <div class="cal-header">
+                            <button class="cal-nav-btn" onclick="changeMonth(-1)"><i class="fa-solid fa-chevron-left"></i></button>
+                            <span class="cal-title" id="cal-month-display">Gennaio 2024</span>
+                            <button class="cal-nav-btn" onclick="changeMonth(1)"><i class="fa-solid fa-chevron-right"></i></button>
+                        </div>
+                        <div class="cal-grid">
+                            <div class="cal-day-header">Lun</div>
+                            <div class="cal-day-header">Mar</div>
+                            <div class="cal-day-header">Mer</div>
+                            <div class="cal-day-header">Gio</div>
+                            <div class="cal-day-header">Ven</div>
+                            <div class="cal-day-header" style="color: #ef4444">Sab</div>
+                            <div class="cal-day-header" style="color: #ef4444">Dom</div>
+                            <div id="cal-days-grid" style="display: contents;"></div>
+                        </div>
+                        <div class="cal-legend">
+                            <div class="legend-item"><span class="dot" style="background:#f8fafc; border:1px solid #cbd5e1"></span> Lavorativo (Clicca per aggiungere)</div>
+                            <div class="legend-item"><span class="dot" style="background:var(--warning)"></span> Pianificato</div>
+                            <div class="legend-item"><span class="dot" style="background:var(--success)"></span> Fruito</div>
+                            <div class="legend-item"><span class="dot" style="background:#fee2e2"></span> Festivo</div>
+                        </div>
                     </div>
                 </div>
 
@@ -375,10 +262,43 @@
         </div>
     </div>
 
+    <div id="edit-modal" class="modal-overlay">
+        <div class="modal-box">
+            <div class="modal-header">
+                <span id="modal-title">Gestisci Data</span>
+                <button onclick="closeModal()" style="background:none; border:none; cursor:pointer; font-size:1.2rem;"><i class="fa-solid fa-xmark"></i></button>
+            </div>
+            <div class="input-group" style="margin-bottom: 15px;">
+                <label>Data Selezionata</label>
+                <input type="text" id="modal-date-display" disabled style="background: #f1f5f9; font-weight: bold;">
+                <input type="hidden" id="modal-date-value">
+            </div>
+            <div class="input-group" style="margin-bottom: 15px;">
+                <label>Tipologia</label>
+                <select id="modal-type">
+                    <option value="ferie">Ferie</option>
+                    <option value="festivita">Festività soppresse</option>
+                    <option value="pir">PIR</option>
+                    <option value="smonetizzazione">Smonetizzazione</option>
+                </select>
+            </div>
+            <div style="margin-bottom: 20px; display: flex; align-items: center; gap: 10px;">
+                <input type="checkbox" id="modal-fruito" style="width: 20px; height: 20px;">
+                <label for="modal-fruito" style="cursor: pointer; font-weight: 500;">Segna come Già Fruito</label>
+            </div>
+            
+            <div class="modal-actions">
+                <button id="btn-modal-delete" class="btn btn-danger" onclick="modalDelete()" style="display: none;">Elimina</button>
+                <button class="btn" onclick="closeModal()">Annulla</button>
+                <button class="btn btn-primary" onclick="modalSave()">Salva</button>
+            </div>
+        </div>
+    </div>
+
     <script>
-        // --- CONFIGURAZIONE E STATO ---
+        // --- CONFIG ---
         const CONFIG = {
-            storageKey: 'ferieApp_v2',
+            storageKey: 'ferieApp_v4_cal', 
             festivitaFisse: ['01-01', '01-06', '04-25', '05-01', '06-02', '08-15', '11-01', '12-08', '12-25', '12-26'],
             tipi: {
                 ferie: 'Ferie',
@@ -388,32 +308,24 @@
             }
         };
 
-        // Struttura Dati Principale
-        let appState = {
-            baseYear: new Date().getFullYear(),
-            // I dati sono salvati per anno: { 2024: { spettanze: {...}, assenze: [...] }, 2025: ... }
-            yearsData: {}
-        };
+        let appState = { baseYear: new Date().getFullYear(), yearsData: {} };
+        let currentViewYear = null;
+        let calendarDate = new Date();
 
-        let currentViewYear = null; // Anno attualmente visualizzato nel tab
-
-        // --- INIZIALIZZAZIONE ---
-        document.addEventListener('DOMContentLoaded', () => {
-            loadData();
-            initUI();
-        });
+        document.addEventListener('DOMContentLoaded', () => { loadData(); initUI(); });
 
         function initUI() {
-            // Setup Tab Base Year
             document.getElementById('base-year-input').value = appState.baseYear;
             currentViewYear = appState.baseYear;
+            calendarDate.setFullYear(currentViewYear);
+            calendarDate.setMonth(0);
 
             renderTabs();
             renderYearView();
 
-            // Event Listeners Globali
             document.getElementById('update-year-btn').addEventListener('click', updateBaseYear);
-            document.getElementById('new-date').addEventListener('input', validateInput);
+            document.getElementById('new-date-start').addEventListener('input', validateInput);
+            document.getElementById('new-date-end').addEventListener('input', validateInput);
             document.getElementById('new-type').addEventListener('change', validateInput);
             document.getElementById('btn-add-record').addEventListener('click', addRecord);
             document.getElementById('btn-export').addEventListener('click', exportExcel);
@@ -422,84 +334,53 @@
             document.getElementById('btn-reset-year').addEventListener('click', resetCurrentYear);
         }
 
-        // --- GESTIONE DATI (LOAD/SAVE/MIGRATE) ---
+        // --- DATA ---
         function loadData() {
             const raw = localStorage.getItem(CONFIG.storageKey);
-            if (raw) {
-                appState = JSON.parse(raw);
-            } else {
-                // Tenta migrazione dalla vecchia versione
-                const oldData = localStorage.getItem('consuntivazioneApp');
-                if (oldData) {
-                    migrateData(JSON.parse(oldData));
-                } else {
-                    // Init vuoto per anno corrente e successivo
-                    ensureYearInitialized(appState.baseYear);
-                    ensureYearInitialized(appState.baseYear + 1);
-                }
-            }
+            const oldV3 = localStorage.getItem('ferieApp_v3_range');
+            if (raw) appState = JSON.parse(raw);
+            else if (oldV3) appState = JSON.parse(oldV3);
+            else { ensureYearInitialized(appState.baseYear); ensureYearInitialized(appState.baseYear + 1); }
         }
-
-        function saveData() {
-            localStorage.setItem(CONFIG.storageKey, JSON.stringify(appState));
-        }
-
+        function saveData() { localStorage.setItem(CONFIG.storageKey, JSON.stringify(appState)); }
         function ensureYearInitialized(year) {
-            if (!appState.yearsData[year]) {
-                appState.yearsData[year] = {
-                    spettanze: { ferie: 25, festivita: 4, pir: 2, smonetizzazione: 1 },
-                    assenze: []
-                };
-            }
+            if (!appState.yearsData[year]) appState.yearsData[year] = { spettanze: { ferie: 25, festivita: 4, pir: 2, smonetizzazione: 1 }, assenze: [] };
         }
 
-        function migrateData(oldData) {
-            console.log("Migrazione dati vecchia versione...");
-            const year = appState.baseYear;
-            ensureYearInitialized(year);
-            
-            // Copia spettanze
-            if(oldData.spettanze) appState.yearsData[year].spettanze = oldData.spettanze;
-            
-            // Copia assenze
-            if(oldData.assenze && Array.isArray(oldData.assenze)) {
-                appState.yearsData[year].assenze = oldData.assenze.map(a => ({
-                    id: a.id || Date.now() + Math.random(),
-                    data: a.data,
-                    tipo: a.tipo,
-                    fruito: a.fruito
-                })).filter(a => a.data && a.data.startsWith(year)); // Prende solo quelle dell'anno base
-            }
-            saveData();
+        // --- UI CORE ---
+        function toggleMode() {
+            const mode = document.querySelector('input[name="insert-mode"]:checked').value;
+            document.getElementById('group-date-end').style.display = mode === 'range' ? 'flex' : 'none';
+            document.getElementById('lbl-date-start').textContent = mode === 'range' ? 'Dal (incluso)' : 'Data';
+            validateInput();
         }
 
-        // --- LOGICA DI RENDERIZZAZIONE ---
+        function switchView(viewName) {
+            document.getElementById('list-view-container').style.display = viewName === 'list' ? 'block' : 'none';
+            const calCont = document.getElementById('calendar-view-container');
+            if(viewName === 'calendar') { calCont.classList.add('visible'); renderCalendar(); } else { calCont.classList.remove('visible'); }
+            document.getElementById('view-list-btn').classList.toggle('active', viewName === 'list');
+            document.getElementById('view-cal-btn').classList.toggle('active', viewName === 'calendar');
+        }
+
         function updateBaseYear() {
             const val = parseInt(document.getElementById('base-year-input').value);
             if (val && val > 2000) {
                 appState.baseYear = val;
-                ensureYearInitialized(val);
-                ensureYearInitialized(val + 1);
-                currentViewYear = val;
-                saveData();
-                renderTabs();
-                renderYearView();
+                ensureYearInitialized(val); ensureYearInitialized(val + 1);
+                currentViewYear = val; calendarDate.setFullYear(val);
+                saveData(); renderTabs(); renderYearView();
             }
         }
 
         function renderTabs() {
             const container = document.getElementById('year-tabs-container');
             container.innerHTML = '';
-            
             [appState.baseYear, appState.baseYear + 1].forEach(year => {
                 const btn = document.createElement('button');
                 btn.className = `year-tab ${year === currentViewYear ? 'active' : ''}`;
                 btn.textContent = year;
-                btn.onclick = () => {
-                    currentViewYear = year;
-                    renderTabs();
-                    renderYearView();
-                };
+                btn.onclick = () => { currentViewYear = year; calendarDate.setFullYear(year); renderTabs(); renderYearView(); };
                 container.appendChild(btn);
             });
         }
@@ -507,383 +388,339 @@
         function renderYearView() {
             ensureYearInitialized(currentViewYear);
             document.getElementById('lbl-active-year').textContent = currentViewYear;
-            
             renderSpettanzeInputs();
             renderTable();
             renderSummary();
+            renderCalendar();
             
-            // Reset form inserimento
-            document.getElementById('new-date').value = '';
+            document.getElementById('new-date-start').value = '';
+            document.getElementById('new-date-end').value = '';
+            document.getElementById('validation-msg').style.display = 'none';
+            document.getElementById('success-msg').style.display = 'none';
             validateInput();
         }
 
+        // --- SUB RENDERS ---
         function renderSpettanzeInputs() {
             const container = document.getElementById('spettanze-container');
             container.innerHTML = '';
             const data = appState.yearsData[currentViewYear].spettanze;
-
             Object.keys(CONFIG.tipi).forEach(key => {
                 const div = document.createElement('div');
                 div.className = 'spettanza-row';
-                div.innerHTML = `
-                    <label>${CONFIG.tipi[key]}</label>
-                    <input type="number" value="${data[key]}" onchange="updateSpettanza('${key}', this.value)">
-                `;
+                div.innerHTML = `<label>${CONFIG.tipi[key]}</label><input type="number" value="${data[key]}" onchange="updateSpettanza('${key}', this.value)">`;
                 container.appendChild(div);
             });
+            document.getElementById('total-spettanze').textContent = Object.values(data).reduce((a, b) => a + Number(b), 0);
+        }
 
-            const total = Object.values(data).reduce((a, b) => a + Number(b), 0);
-            document.getElementById('total-spettanze').textContent = total;
+        function renderSummary() {
+            const container = document.getElementById('summary-dashboard');
+            const data = appState.yearsData[currentViewYear];
+            const counts = { pianificati: 0, fruiti: 0 };
+            const byType = {};
+            Object.keys(CONFIG.tipi).forEach(k => byType[k] = { pianificati: 0, fruiti: 0 });
+
+            data.assenze.forEach(a => {
+                if(byType[a.tipo]) {
+                    byType[a.tipo].pianificati++;
+                    counts.pianificati++;
+                    if(a.fruito) { byType[a.tipo].fruito++; counts.fruiti++; }
+                }
+            });
+
+            let html = '';
+            Object.keys(CONFIG.tipi).forEach(key => {
+                const residuo = data.spettanze[key] - byType[key].pianificati;
+                const badgeClass = residuo >= 0 ? 'bg-ok' : 'bg-warn';
+                html += `<div class="summary-item"><span>${CONFIG.tipi[key]}</span><div><small class="text-muted">Pian: ${byType[key].pianificati}</small> <span class="badge-residuo ${badgeClass}">Res: ${residuo}</span></div></div>`;
+            });
+            const totSpettanze = Object.values(data.spettanze).reduce((a,b)=>a+Number(b),0);
+            const totResiduo = totSpettanze - counts.pianificati;
+            html += `<div class="summary-item total"><span>Totale Pianificati</span><span>${counts.pianificati}</span></div>
+                     <div class="summary-item total"><span>Totale Fruiti</span><span>${counts.fruiti}</span></div>
+                     <div class="summary-item total" style="color: ${totResiduo >= 0 ? 'var(--primary-dark)' : 'var(--danger)'}"><span>Residuo Totale</span><span>${totResiduo}</span></div>`;
+            container.innerHTML = html;
         }
 
         function renderTable() {
             const tbody = document.getElementById('table-body');
             tbody.innerHTML = '';
             const list = appState.yearsData[currentViewYear].assenze;
-            
-            // Ordina per data
             list.sort((a, b) => a.data.localeCompare(b.data));
-
-            if (list.length === 0) {
-                document.getElementById('empty-state').style.display = 'block';
-                return;
-            } else {
-                document.getElementById('empty-state').style.display = 'none';
-            }
+            document.getElementById('empty-state').style.display = list.length === 0 ? 'block' : 'none';
 
             list.forEach(item => {
                 const tr = document.createElement('tr');
                 const dateObj = new Date(item.data);
                 const dayName = dateObj.toLocaleDateString('it-IT', { weekday: 'long' });
-                
                 tr.innerHTML = `
                     <td>${dateObj.toLocaleDateString('it-IT')}</td>
                     <td style="text-transform: capitalize">${dayName}</td>
                     <td>${CONFIG.tipi[item.tipo]}</td>
-                    <td style="text-align: center">
-                        <i class="fa-solid ${item.fruito ? 'fa-circle-check active' : 'fa-circle'} status-toggle" 
-                           onclick="toggleFruito(${item.id})"></i>
-                    </td>
-                    <td style="text-align: right">
-                        <button class="btn-del" onclick="deleteRecord(${item.id})"><i class="fa-solid fa-trash"></i></button>
-                    </td>
+                    <td style="text-align: center"><i class="fa-solid ${item.fruito ? 'fa-circle-check active' : 'fa-circle'} status-toggle" onclick="toggleFruito(${item.id})"></i></td>
+                    <td style="text-align: right"><button class="btn-del" onclick="deleteRecord(${item.id})"><i class="fa-solid fa-trash"></i></button></td>
                 `;
                 tbody.appendChild(tr);
             });
         }
 
-        function renderSummary() {
-            const container = document.getElementById('summary-dashboard');
-            const data = appState.yearsData[currentViewYear];
-            const spettanze = data.spettanze;
-            const assenze = data.assenze;
+        // --- CALENDAR LOGIC ---
+        function changeMonth(delta) { calendarDate.setMonth(calendarDate.getMonth() + delta); renderCalendar(); }
 
-            // Calcoli
-            const counts = { pianificati: 0, fruiti: 0 };
-            const byType = {};
+        function renderCalendar() {
+            const grid = document.getElementById('cal-days-grid');
+            const monthDisplay = document.getElementById('cal-month-display');
+            grid.innerHTML = ''; 
+
+            const year = calendarDate.getFullYear();
+            const month = calendarDate.getMonth();
+            const monthName = calendarDate.toLocaleDateString('it-IT', { month: 'long', year: 'numeric' });
+            monthDisplay.textContent = monthName.charAt(0).toUpperCase() + monthName.slice(1);
+
+            const firstDayOfMonth = new Date(year, month, 1);
+            const daysInMonth = new Date(year, month + 1, 0).getDate();
+            let startDay = firstDayOfMonth.getDay();
+            if (startDay === 0) startDay = 7; 
             
-            Object.keys(CONFIG.tipi).forEach(k => byType[k] = { pianificati: 0, fruiti: 0 });
+            for (let i = 1; i < startDay; i++) { grid.appendChild(document.createElement('div')); }
 
-            assenze.forEach(a => {
-                if(byType[a.tipo]) {
-                    byType[a.tipo].pianificati++;
-                    counts.pianificati++;
-                    if(a.fruito) {
-                        byType[a.tipo].fruito++;
-                        counts.fruiti++;
-                    }
+            const assenze = appState.yearsData[year] ? appState.yearsData[year].assenze : [];
+
+            for (let d = 1; d <= daysInMonth; d++) {
+                const dayStr = `${year}-${String(month + 1).padStart(2, '0')}-${String(d).padStart(2, '0')}`;
+                const cell = document.createElement('div');
+                cell.className = 'cal-day';
+                
+                const currentDayDate = new Date(year, month, d);
+                const dayOfWeek = currentDayDate.getDay();
+                const isWeekend = (dayOfWeek === 0 || dayOfWeek === 6);
+                const isFestivo = CONFIG.festivitaFisse.includes(dayStr.slice(5));
+
+                if (isFestivo) cell.classList.add('festivity');
+                else if (isWeekend) cell.classList.add('weekend');
+
+                const record = assenze.find(a => a.data === dayStr);
+                let content = `<span class="day-num">${d}</span>`;
+                
+                if (record) {
+                    if (record.fruito) cell.classList.add('taken');
+                    else cell.classList.add('planned');
+                    content += `<span class="day-type">${CONFIG.tipi[record.tipo].substring(0, 12)}</span>`;
                 }
-            });
 
-            let html = '';
-            
-            // Dettaglio per tipo (Residui)
-            Object.keys(CONFIG.tipi).forEach(key => {
-                const residuo = spettanze[key] - byType[key].pianificati;
-                const badgeClass = residuo >= 0 ? 'bg-ok' : 'bg-warn';
-                html += `
-                    <div class="summary-item">
-                        <span>${CONFIG.tipi[key]}</span>
-                        <div>
-                            <small class="text-muted">Pian: ${byType[key].pianificati}</small>
-                            <span class="badge-residuo ${badgeClass}">Res: ${residuo}</span>
-                        </div>
-                    </div>
-                `;
-            });
-
-            // Totali Generali
-            const totSpettanze = Object.values(spettanze).reduce((a,b)=>a+Number(b),0);
-            const totResiduo = totSpettanze - counts.pianificati;
-            
-            html += `
-                <div class="summary-item total">
-                    <span>Totale Pianificati</span>
-                    <span>${counts.pianificati}</span>
-                </div>
-                 <div class="summary-item total">
-                    <span>Totale Fruiti</span>
-                    <span>${counts.fruiti}</span>
-                </div>
-                <div class="summary-item total" style="color: ${totResiduo >= 0 ? 'var(--primary-dark)' : 'var(--danger)'}">
-                    <span>Residuo Totale da Pianificare</span>
-                    <span>${totResiduo}</span>
-                </div>
-            `;
-
-            container.innerHTML = html;
+                cell.innerHTML = content;
+                // Click interaction
+                if(!isWeekend && !isFestivo) {
+                    cell.onclick = () => openModal(dayStr);
+                }
+                grid.appendChild(cell);
+            }
         }
 
-        // --- AZIONI UTENTE ---
-        function updateSpettanza(key, value) {
-            appState.yearsData[currentViewYear].spettanze[key] = Number(value);
+        // --- MODAL LOGIC ---
+        function openModal(dateStr) {
+            // Controlla se siamo nell'anno visualizzato
+            const y = parseInt(dateStr.slice(0,4));
+            if(y !== currentViewYear) return; 
+
+            const modal = document.getElementById('edit-modal');
+            const list = appState.yearsData[currentViewYear].assenze;
+            const record = list.find(a => a.data === dateStr);
+
+            document.getElementById('modal-date-value').value = dateStr;
+            document.getElementById('modal-date-display').value = new Date(dateStr).toLocaleDateString('it-IT', { weekday: 'long', year: 'numeric', month: 'long', day: 'numeric' });
+            
+            const btnDelete = document.getElementById('btn-modal-delete');
+            const typeSel = document.getElementById('modal-type');
+            const checkFruito = document.getElementById('modal-fruito');
+
+            if(record) {
+                document.getElementById('modal-title').textContent = "Modifica Assenza";
+                typeSel.value = record.tipo;
+                checkFruito.checked = record.fruito;
+                btnDelete.style.display = 'inline-block';
+            } else {
+                document.getElementById('modal-title').textContent = "Nuova Assenza";
+                typeSel.value = 'ferie';
+                checkFruito.checked = false;
+                btnDelete.style.display = 'none';
+            }
+
+            modal.style.display = 'flex';
+        }
+
+        function closeModal() {
+            document.getElementById('edit-modal').style.display = 'none';
+        }
+
+        function modalSave() {
+            const dateStr = document.getElementById('modal-date-value').value;
+            const type = document.getElementById('modal-type').value;
+            const fruito = document.getElementById('modal-fruito').checked;
+            
+            let list = appState.yearsData[currentViewYear].assenze;
+            // Rimuovi vecchio se esiste
+            list = list.filter(a => a.data !== dateStr);
+            
+            // Aggiungi nuovo
+            list.push({
+                id: Date.now(),
+                data: dateStr,
+                tipo: type,
+                fruito: fruito
+            });
+            
+            appState.yearsData[currentViewYear].assenze = list;
             saveData();
-            renderSpettanzeInputs(); // aggiorna totale
-            renderSummary();
+            renderYearView();
+            closeModal();
+        }
+
+        function modalDelete() {
+            if(!confirm("Eliminare questa assenza?")) return;
+            const dateStr = document.getElementById('modal-date-value').value;
+            let list = appState.yearsData[currentViewYear].assenze;
+            appState.yearsData[currentViewYear].assenze = list.filter(a => a.data !== dateStr);
+            saveData();
+            renderYearView();
+            closeModal();
+        }
+
+        // --- CRUD HELPERS ---
+        function isWorkingDay(dateObj) {
+            const day = dateObj.getDay();
+            if (day === 0 || day === 6) return false;
+            const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+            const d = String(dateObj.getDate()).padStart(2, '0');
+            return !CONFIG.festivitaFisse.includes(`${m}-${d}`);
         }
 
         function validateInput() {
-            const dateInput = document.getElementById('new-date');
-            const addBtn = document.getElementById('btn-add-record');
+            const mode = document.querySelector('input[name="insert-mode"]:checked').value;
+            const startVal = document.getElementById('new-date-start').value;
             const msgBox = document.getElementById('validation-msg');
-            const dateVal = dateInput.value;
+            const addBtn = document.getElementById('btn-add-record');
 
             msgBox.style.display = 'none';
             addBtn.disabled = true;
 
-            if (!dateVal) return;
+            if (!startVal) return;
+            const startYear = new Date(startVal).getFullYear();
+            if (startYear !== currentViewYear) { msgBox.textContent = `Anno errato (${currentViewYear}).`; msgBox.style.display = 'block'; return; }
 
-            const dateObj = new Date(dateVal);
-            const year = dateObj.getFullYear();
-            const day = dateObj.getDay(); // 0 Dom, 6 Sab
-            const dayMonth = dateVal.slice(5); // MM-DD
-
-            // Controllo 1: Anno congruente col tab
-            if (year !== currentViewYear) {
-                msgBox.textContent = `Attenzione: Stai visualizzando il ${currentViewYear}, ma hai selezionato una data del ${year}. Cambia Tab o data.`;
-                msgBox.style.display = 'block';
-                return;
+            if (mode === 'single') {
+                if (!isWorkingDay(new Date(startVal))) { msgBox.textContent = "Festivo/Weekend."; msgBox.style.display = 'block'; return; }
+                if (appState.yearsData[currentViewYear].assenze.some(a => a.data === startVal)) { msgBox.textContent = "Già presente."; msgBox.style.display = 'block'; return; }
+            } else {
+                const endVal = document.getElementById('new-date-end').value;
+                if (!endVal || endVal < startVal) { msgBox.textContent = "Data fine non valida."; msgBox.style.display = 'block'; return; }
+                if ((new Date(endVal) - new Date(startVal))/86400000 > 365) { msgBox.textContent = "Intervallo max 1 anno."; msgBox.style.display = 'block'; return; }
             }
-
-            // Controllo 2: Sabato o Domenica
-            if (day === 0 || day === 6) {
-                msgBox.textContent = "Non è possibile pianificare ferie di Sabato o Domenica.";
-                msgBox.style.display = 'block';
-                return;
-            }
-
-            // Controllo 3: Festività Fissa
-            if (CONFIG.festivitaFisse.includes(dayMonth)) {
-                msgBox.textContent = "Data non selezionabile: è una festività nazionale.";
-                msgBox.style.display = 'block';
-                return;
-            }
-
-            // Controllo 4: Duplicati
-            const exists = appState.yearsData[currentViewYear].assenze.some(a => a.data === dateVal);
-            if (exists) {
-                msgBox.textContent = "Esiste già una pianificazione per questa data.";
-                msgBox.style.display = 'block';
-                return;
-            }
-
             addBtn.disabled = false;
         }
 
         function addRecord() {
-            const dateVal = document.getElementById('new-date').value;
+            const mode = document.querySelector('input[name="insert-mode"]:checked').value;
+            const startVal = document.getElementById('new-date-start').value;
             const typeVal = document.getElementById('new-type').value;
+            const successBox = document.getElementById('success-msg');
+            let added = 0, skipped = 0;
+            const list = appState.yearsData[currentViewYear].assenze;
 
-            if (!dateVal) return;
-
-            appState.yearsData[currentViewYear].assenze.push({
-                id: Date.now(),
-                data: dateVal,
-                tipo: typeVal,
-                fruito: false
-            });
-
-            saveData();
-            renderYearView();
+            if (mode === 'single') {
+                list.push({ id: Date.now(), data: startVal, tipo: typeVal, fruito: false });
+                added = 1;
+            } else {
+                const endVal = document.getElementById('new-date-end').value;
+                let curr = new Date(startVal);
+                const end = new Date(endVal);
+                while (curr <= end) {
+                    if (curr.getFullYear() === currentViewYear && isWorkingDay(curr)) {
+                        const dStr = curr.toISOString().split('T')[0];
+                        if (!list.some(a => a.data === dStr)) {
+                            list.push({ id: Date.now() + Math.random(), data: dStr, tipo: typeVal, fruito: false });
+                            added++;
+                        } else skipped++;
+                    }
+                    curr.setDate(curr.getDate() + 1);
+                }
+            }
+            saveData(); renderYearView();
+            if (mode === 'range') { successBox.textContent = `Aggiunti ${added}, Saltati ${skipped}.`; successBox.style.display = 'block'; setTimeout(() => successBox.style.display = 'none', 4000); }
         }
 
         function deleteRecord(id) {
-            if(confirm('Eliminare questa voce?')) {
-                appState.yearsData[currentViewYear].assenze = 
-                    appState.yearsData[currentViewYear].assenze.filter(a => a.id !== id);
-                saveData();
-                renderYearView();
+            if(confirm('Eliminare?')) {
+                appState.yearsData[currentViewYear].assenze = appState.yearsData[currentViewYear].assenze.filter(a => a.id !== id);
+                saveData(); renderYearView();
             }
         }
-
         function toggleFruito(id) {
             const item = appState.yearsData[currentViewYear].assenze.find(a => a.id === id);
-            if(item) {
-                item.fruito = !item.fruito;
-                saveData();
-                renderTable();
-                renderSummary();
-            }
+            if(item) { item.fruito = !item.fruito; saveData(); renderYearView(); }
         }
-
+        function updateSpettanza(key, value) {
+            appState.yearsData[currentViewYear].spettanze[key] = Number(value);
+            saveData(); renderSpettanzeInputs(); renderSummary();
+        }
         function resetCurrentYear() {
-            if(confirm(`Sei sicuro di voler CANCELLARE TUTTE le pianificazioni del ${currentViewYear}? Le spettanze rimarranno invariate.`)) {
-                appState.yearsData[currentViewYear].assenze = [];
-                saveData();
-                renderYearView();
-            }
+            if(confirm(`Cancellare TUTTO il ${currentViewYear}?`)) { appState.yearsData[currentViewYear].assenze = []; saveData(); renderYearView(); }
         }
 
-        // --- EXPORT / IMPORT EXCEL ---
+        // --- EXPORT/IMPORT ---
         function exportExcel() {
             try {
                 const wb = XLSX.utils.book_new();
-
-                // 1. Creazione Sheet Dati (tutti gli anni o solo corrente? Esportiamo tutto per backup, ma filtriamo nel nome)
-                // Creiamo un foglio unico con tutti i dati storici, ma ordinati
                 const allRows = [];
-                
-                // Iteriamo sugli anni gestiti
                 Object.keys(appState.yearsData).sort().forEach(year => {
-                    const data = appState.yearsData[year];
-                    data.assenze.forEach(a => {
-                        allRows.push({
-                            'Anno Riferimento': year,
-                            'Data': a.data, // Stringa YYYY-MM-DD
-                            'Giorno': new Date(a.data).toLocaleDateString('it-IT', {weekday: 'long'}),
-                            'Tipologia': CONFIG.tipi[a.tipo],
-                            'Stato': a.fruito ? 'Fruito' : 'Pianificato'
-                        });
+                    appState.yearsData[year].assenze.forEach(a => {
+                        allRows.push({ 'Anno': year, 'Data': a.data, 'Giorno': new Date(a.data).toLocaleDateString('it-IT', {weekday:'long'}), 'Tipologia': CONFIG.tipi[a.tipo], 'Stato': a.fruito ? 'Fruito' : 'Pianificato' });
                     });
                 });
-
-                // Ordine cronologico
                 allRows.sort((a,b) => a.Data.localeCompare(b.Data));
-
-                const wsData = XLSX.utils.json_to_sheet(allRows);
-                XLSX.utils.book_append_sheet(wb, wsData, "Diario Assenze");
-
-                // 2. Creazione Sheet Spettanze
-                const spettanzeRows = [];
-                Object.keys(appState.yearsData).sort().forEach(year => {
-                    const s = appState.yearsData[year].spettanze;
-                    spettanzeRows.push({
-                        'Anno': year,
-                        'Ferie': s.ferie,
-                        'Festività': s.festivita,
-                        'PIR': s.pir,
-                        'Smonetizzazione': s.smonetizzazione
-                    });
-                });
-                const wsSpettanze = XLSX.utils.json_to_sheet(spettanzeRows);
-                XLSX.utils.book_append_sheet(wb, wsSpettanze, "Spettanze");
-
-                // Naming file: PianoFerie_ANNO_DATA.xlsx
-                const today = new Date().toISOString().slice(0,10).replace(/-/g, '');
-                const fileName = `PianoFerie_${appState.baseYear}_${today}.xlsx`;
-
-                XLSX.writeFile(wb, fileName);
-
-            } catch (e) {
-                alert("Errore export: " + e.message);
-            }
+                XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(allRows), "Diario Assenze");
+                const sRows = [];
+                Object.keys(appState.yearsData).sort().forEach(year => sRows.push({ 'Anno': year, ...appState.yearsData[year].spettanze }));
+                XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sRows), "Spettanze");
+                XLSX.writeFile(wb, `PianoFerie_${appState.baseYear}_${new Date().toISOString().slice(0,10).replace(/-/g,'')}.xlsx`);
+            } catch (e) { alert(e.message); }
         }
 
         function importExcel() {
             const file = document.getElementById('file-input').files[0];
             if (!file) return;
-
             const reader = new FileReader();
             reader.onload = (e) => {
                 try {
-                    const data = new Uint8Array(e.target.result);
-                    const workbook = XLSX.read(data, { type: 'array' });
-
-                    // Logica semplificata: Cerchiamo sheet "Diario Assenze" o "Pianificazione"
-                    let sheetName = workbook.SheetNames.find(n => n.includes("Assenze") || n.includes("Pianificazione"));
-                    if (!sheetName) throw new Error("Foglio dati non trovato");
-
-                    const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
-                    
-                    if(!confirm(`Trovati ${rows.length} record. Questo sovrascriverà i dati attuali. Continuare?`)) return;
-
-                    // Reset soft
-                    appState.yearsData = {}; 
-
-                    rows.forEach(row => {
-                        // Supporto importazione vecchio formato (dove Data era oggetto data Excel) o nuovo (Stringa)
-                        let dateStr = row['Data'];
-                        if (typeof dateStr !== 'string') {
-                            // Tentativo conversione data Excel
-                            // (SheetJS di solito gestisce date se option cellDates: true non è usato nel read, ma qui usiamo raw)
-                             // Se è numero seriale Excel, è complicato senza cellDates, ma proviamo string parsing base
-                             // Assumiamo che l'utente stia re-importando un file esportato da questa app
-                        }
-                        
-                        // Normalizza data YYYY-MM-DD
-                        if(row['Data'] && row['Data'].match(/^\d{4}-\d{2}-\d{2}$/)) {
-                            dateStr = row['Data'];
-                        } 
-                        
-                        if (dateStr) {
-                            const y = dateStr.slice(0, 4);
-                            ensureYearInitialized(Number(y));
-                            
-                            // Mappa inversa Tipologia
-                            let typeKey = 'ferie';
-                            const tVal = row['Tipologia'] || row['Tipologia di Spettanza']; // Compatibilità
-                            Object.entries(CONFIG.tipi).forEach(([k, v]) => {
-                                if(v === tVal) typeKey = k;
-                            });
-
-                            const isFruito = (row['Stato'] === 'Fruito') || (String(row['Fruito']).toLowerCase() === 'si');
-
-                            appState.yearsData[y].assenze.push({
-                                id: Date.now() + Math.random(),
-                                data: dateStr,
-                                tipo: typeKey,
-                                fruito: isFruito
-                            });
+                    const wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+                    const sn = wb.SheetNames.find(n => n.includes("Assenze"));
+                    if (!sn) throw new Error("Foglio dati non trovato");
+                    const rows = XLSX.utils.sheet_to_json(wb.Sheets[sn]);
+                    if(!confirm(`Sovrascrivo con ${rows.length} record?`)) return;
+                    appState.yearsData = {};
+                    rows.forEach(r => {
+                        let dStr = r['Data'];
+                        if(dStr && dStr.match(/^\d{4}-\d{2}-\d{2}$/)) {
+                            const y = Number(dStr.slice(0,4));
+                            ensureYearInitialized(y);
+                            let tKey = 'ferie';
+                            Object.entries(CONFIG.tipi).forEach(([k,v]) => { if(v===r['Tipologia']) tKey=k; });
+                            appState.yearsData[y].assenze.push({ id: Date.now()+Math.random(), data: dStr, tipo: tKey, fruito: r['Stato']==='Fruito' });
                         }
                     });
-
-                    // Recupero spettanze se presenti
-                    const spSheet = workbook.SheetNames.find(n => n.includes("Spettanze"));
-                    if(spSheet) {
-                        const spRows = XLSX.utils.sheet_to_json(workbook.Sheets[spSheet]);
-                        spRows.forEach(row => {
-                            if(row['Anno']) {
-                                ensureYearInitialized(row['Anno']);
-                                appState.yearsData[row['Anno']].spettanze = {
-                                    ferie: row['Ferie'] || 0,
-                                    festivita: row['Festività'] || 0,
-                                    pir: row['PIR'] || 0,
-                                    smonetizzazione: row['Smonetizzazione'] || 0
-                                };
-                            }
+                    const spSn = wb.SheetNames.find(n => n.includes("Spettanze"));
+                    if(spSn) {
+                        XLSX.utils.sheet_to_json(wb.Sheets[spSn]).forEach(r => {
+                            if(r['Anno']) { ensureYearInitialized(r['Anno']); appState.yearsData[r['Anno']].spettanze = { ferie: r['Ferie']||0, festivita: r['Festività']||0, pir: r['PIR']||0, smonetizzazione: r['Smonetizzazione']||0 }; }
                         });
                     }
-
-                    // Aggiorna baseYear in base ai dati importati (il più recente)
-                    const years = Object.keys(appState.yearsData).map(Number).sort((a,b)=>b-a);
-                    if(years.length > 0) {
-                        appState.baseYear = years.includes(new Date().getFullYear()) ? new Date().getFullYear() : years[0];
-                    }
-
-                    saveData();
-                    initUI();
-                    alert("Importazione completata!");
-
-                } catch (err) {
-                    console.error(err);
-                    alert("Errore importazione: " + err.message);
-                } finally {
-                    document.getElementById('file-input').value = '';
-                }
+                    saveData(); initUI(); alert("Fatto!");
+                } catch (err) { alert(err.message); }
+                document.getElementById('file-input').value = '';
             };
             reader.readAsArrayBuffer(file);
         }
-
     </script>
 </body>
 </html>
