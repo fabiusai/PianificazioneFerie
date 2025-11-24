@@ -3,693 +3,887 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Consuntivazione Ferie e Assenze</title>
-<link rel="icon" href="favicon.ico">
-    <!-- Inclusione della libreria SheetJS per la gestione dei file Excel -->
+    <title>Piano Ferie Smart</title>
+    <link rel="icon" href="favicon.ico">
     <script src="https://cdn.sheetjs.com/xlsx-latest/package/dist/xlsx.full.min.js"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
     <style>
-        /* --- Stile Generale --- */
+        :root {
+            --primary: #2563eb;
+            --primary-dark: #1e40af;
+            --secondary: #64748b;
+            --success: #22c55e;
+            --danger: #ef4444;
+            --warning: #f59e0b;
+            --bg-body: #f1f5f9;
+            --bg-card: #ffffff;
+            --text-main: #1e293b;
+            --text-muted: #64748b;
+            --border: #e2e8f0;
+            --radius: 12px;
+            --shadow: 0 4px 6px -1px rgb(0 0 0 / 0.1), 0 2px 4px -2px rgb(0 0 0 / 0.1);
+        }
+
         body {
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
-            line-height: 1.6;
-            background-color: #f4f7f9;
-            color: #333;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            background-color: var(--bg-body);
+            color: var(--text-main);
             margin: 0;
             padding: 20px;
+            line-height: 1.5;
         }
 
         .container {
-            max-width: 1100px;
+            max-width: 1200px;
             margin: 0 auto;
-            background-color: #fff;
-            padding: 30px;
-            border-radius: 12px;
-            box-shadow: 0 6px 20px rgba(0, 0, 0, 0.1);
         }
 
-        /* --- Stile Titoli Migliorato --- */
-        h1 {
-            color: white;
-            background: linear-gradient(to right, #007bff, #0056b3);
-            padding: 20px;
-            margin: -30px -30px 30px -30px; /* Esce dal padding del container */
-            border-radius: 12px 12px 0 0;
-            text-align: center;
-            font-weight: 500;
-        }
-
-        h2 {
-            color: #1a2533;
-            border: none;
-            border-left: 5px solid #007bff;
-            padding-left: 15px;
-            margin-top: 40px;
-            margin-bottom: 25px;
-            font-size: 1.8rem;
-        }
-
-        /* --- Sezioni --- */
-        .section {
-            margin-bottom: 35px;
-        }
-
-        /* --- Sezione Spettanze --- */
-        .spettanze-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
-            gap: 20px;
-        }
-
-        .spettanza-item {
-            display: flex;
-            flex-direction: column;
-        }
-
-        .spettanza-item label {
-            font-weight: bold;
-            color: #555;
-            margin-bottom: 8px;
-        }
-
-        .spettanza-item input {
-            padding: 10px;
-            border: 1px solid #ccc;
-            border-radius: 5px;
-            font-size: 1.1rem;
-            width: 100%;
-            box-sizing: border-box;
-        }
-
-        .spettanza-total {
-            margin-top: 25px;
-            font-size: 1.3rem;
-            font-weight: bold;
-            color: #0056b3;
-        }
-        
-        /* --- Sezione Consuntivazione (Leggibilità Aumentata) --- */
-        .summary-grid {
-            display: grid;
-            grid-template-columns: 1fr 1fr;
-            gap: 40px; /* Aumentato gap */
-        }
-
-        .summary-box {
-            background-color: #f9f9f9;
-            padding: 20px; /* Aumentato padding */
-            border-radius: 8px;
-            border: 1px solid #e0e0e0;
-        }
-        
-        .summary-box h3 {
-            margin-top: 0;
-            margin-bottom: 15px;
-            color: #333;
-            font-size: 1.25rem; /* Aumentata dimensione */
-        }
-
-        .summary-box ul {
-            list-style-type: none;
-            padding: 0;
-            margin-bottom: 15px; /* Aggiunto spazio tra le liste */
-        }
-        
-        .summary-box ul:last-child {
-            margin-bottom: 0;
-        }
-
-        .summary-box li {
+        /* --- Header & Tabs --- */
+        header {
             display: flex;
             justify-content: space-between;
-            padding: 8px 0; /* Aumentato padding */
-            border-bottom: 1px dashed #ddd;
-            font-size: 1.1rem; /* Aumentata dimensione */
-        }
-        
-        .summary-box li:last-child {
-            border-bottom: none;
+            align-items: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+            gap: 15px;
         }
 
-        .summary-box .total {
-            font-weight: bold;
-            margin-top: 15px;
-            color: #0056b3;
-            border-top: 2px solid #aaa;
-            padding-top: 10px;
-            font-size: 1.2rem; /* Aumentata dimensione */
-        }
-        
-        .negative {
-            color: #d93025;
-            font-weight: bold;
+        h1 {
+            font-size: 1.8rem;
+            color: var(--primary-dark);
+            margin: 0;
+            display: flex;
+            align-items: center;
+            gap: 10px;
         }
 
-        /* --- Tabella Pianificazione --- */
-        .table-container {
-            overflow-x: auto;
+        .year-tabs {
+            display: flex;
+            background: #e2e8f0;
+            padding: 4px;
+            border-radius: var(--radius);
         }
-        
-        table {
-            width: 100%;
-            border-collapse: collapse;
-            margin-top: 20px;
+
+        .year-tab {
+            padding: 8px 24px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            border-radius: 8px;
+            font-weight: 600;
+            color: var(--text-muted);
+            transition: all 0.2s;
+        }
+
+        .year-tab.active {
+            background: var(--bg-card);
+            color: var(--primary);
+            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+        }
+
+        /* --- Grid Layout --- */
+        .main-grid {
+            display: grid;
+            grid-template-columns: 300px 1fr;
+            gap: 24px;
+        }
+
+        @media (max-width: 900px) {
+            .main-grid { grid-template-columns: 1fr; }
+        }
+
+        /* --- Cards --- */
+        .card {
+            background: var(--bg-card);
+            border-radius: var(--radius);
+            box-shadow: var(--shadow);
+            padding: 20px;
+            margin-bottom: 24px;
+            border: 1px solid var(--border);
+        }
+
+        .card h2 {
+            font-size: 1.1rem;
+            color: var(--text-muted);
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            margin-top: 0;
+            margin-bottom: 15px;
+            border-bottom: 2px solid var(--bg-body);
+            padding-bottom: 10px;
+        }
+
+        /* --- Spettanze Inputs --- */
+        .spettanza-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 12px;
+        }
+
+        .spettanza-row input {
+            width: 70px;
+            padding: 6px;
+            border: 1px solid var(--border);
+            border-radius: 6px;
+            text-align: center;
+            font-weight: bold;
+            color: var(--primary);
+        }
+
+        /* --- Summary Dashboard --- */
+        .summary-item {
+            display: flex;
+            justify-content: space-between;
+            margin-bottom: 8px;
             font-size: 0.95rem;
         }
 
-        th, td {
+        .summary-item.total {
+            font-weight: bold;
+            border-top: 1px dashed var(--border);
+            padding-top: 8px;
+            margin-top: 8px;
+            color: var(--primary-dark);
+        }
+
+        .badge-residuo {
+            padding: 2px 8px;
+            border-radius: 12px;
+            font-size: 0.85rem;
+            font-weight: bold;
+        }
+        .bg-ok { background-color: #dcfce7; color: #166534; }
+        .bg-warn { background-color: #fee2e2; color: #991b1b; }
+
+        /* --- Input Bar (New Record) --- */
+        .input-bar {
+            display: flex;
+            gap: 10px;
+            background: #f8fafc;
+            padding: 15px;
+            border-radius: var(--radius);
+            border: 1px dashed var(--primary);
+            align-items: end;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .input-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            flex: 1;
+            min-width: 150px;
+        }
+
+        .input-group label {
+            font-size: 0.8rem;
+            font-weight: 600;
+            color: var(--text-muted);
+        }
+
+        .input-group input, .input-group select {
             padding: 10px;
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            font-size: 1rem;
+        }
+
+        .btn-add {
+            background-color: var(--primary);
+            color: white;
+            padding: 10px 20px;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            font-weight: 600;
+            height: 45px;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            transition: background 0.2s;
+        }
+        .btn-add:disabled { background-color: #cbd5e1; cursor: not-allowed; }
+        .btn-add:hover:not(:disabled) { background-color: var(--primary-dark); }
+
+        /* --- Table --- */
+        .table-wrapper {
+            overflow-x: auto;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+        }
+        th {
             text-align: left;
-            border-bottom: 1px solid #ddd;
+            padding: 12px;
+            color: var(--text-muted);
+            font-size: 0.85rem;
+            border-bottom: 2px solid var(--border);
+        }
+        td {
+            padding: 12px;
+            border-bottom: 1px solid var(--border);
             vertical-align: middle;
         }
+        tr:hover td { background-color: #f8fafc; }
 
-        th {
-            background-color: #f2f2f2;
+        .status-toggle {
             cursor: pointer;
+            font-size: 1.2rem;
+            color: var(--border);
+            transition: color 0.2s;
         }
-        
-        th:hover {
-            background-color: #e8e8e8;
-        }
+        .status-toggle.active { color: var(--success); }
 
-        td input[type="date"], td select {
-            padding: 6px;
-            border: 1px solid #ccc;
-            border-radius: 4px;
-            width: 100%;
-            box-sizing: border-box;
-            min-width: 130px;
-        }
-        
-        td input[type="checkbox"] {
-            width: 18px;
-            height: 18px;
-        }
-        
-        .col-center {
-            width: 1%;
-            text-align: center;
-        }
-
-        .delete-btn {
-            background-color: #e74c3c;
-            color: white;
+        .btn-del {
+            background: transparent;
             border: none;
-            padding: 6px 10px;
-            border-radius: 4px;
+            color: var(--text-muted);
             cursor: pointer;
-            transition: background-color 0.2s;
+            padding: 5px;
+            transition: color 0.2s;
         }
+        .btn-del:hover { color: var(--danger); }
 
-        .delete-btn:hover {
-            background-color: #c0392b;
-        }
-
-        /* --- Pulsanti --- */
-        .btn {
-            background-color: #007bff;
-            color: white;
-            padding: 10px 18px;
-            border: none;
-            border-radius: 5px;
-            cursor: pointer;
-            font-size: 1rem;
-            margin-right: 10px;
-            transition: background-color 0.2s;
-        }
-        
-        .btn:hover {
-            background-color: #0056b3;
-        }
-        
-        .btn-secondary {
-            background-color: #6c757d;
-        }
-        
-        .btn-secondary:hover {
-            background-color: #5a6268;
-        }
-        
-        .btn-danger {
-            background-color: #dc3545;
-        }
-        .btn-danger:hover {
-            background-color: #c82333;
-        }
-
-        .data-management {
-            margin-top: 20px;
+        /* --- Footer Actions --- */
+        .actions-bar {
+            margin-top: 30px;
+            padding-top: 20px;
+            border-top: 1px solid var(--border);
             display: flex;
-            flex-wrap: wrap;
             gap: 10px;
-        }
-        
-        #import-file-input {
-            display: none;
+            flex-wrap: wrap;
         }
 
-        /* --- Responsive --- */
-        @media (max-width: 768px) {
-            h1 { font-size: 1.5rem; }
-            h2 { font-size: 1.5rem; }
-            .summary-grid { grid-template-columns: 1fr; }
-            .spettanze-grid { grid-template-columns: 1fr 1fr; }
+        .btn {
+            padding: 8px 16px;
+            border-radius: 6px;
+            border: 1px solid var(--border);
+            background: white;
+            cursor: pointer;
+            font-size: 0.9rem;
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            transition: all 0.2s;
+        }
+        .btn:hover { background: #f1f5f9; }
+        .btn-outline-danger { color: var(--danger); border-color: var(--danger); }
+        .btn-outline-danger:hover { background: #fef2f2; }
+
+        /* --- Config Modal --- */
+        .year-config {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 20px;
+            background: #fff;
+            padding: 10px;
+            border-radius: 8px;
         }
     </style>
 </head>
 <body>
 
     <div class="container">
-        <h1>Consuntivazione Ferie e Assenze</h1>
+        <header>
+            <h1><i class="fa-solid fa-plane-departure"></i> Piano Ferie</h1>
+            <div class="year-tabs" id="year-tabs-container">
+                </div>
+        </header>
 
-        <!-- SEZIONE SPETTANZE -->
-        <div class="section">
-            <h2>Spettanza Giorni di Assenza</h2>
-            <div class="spettanze-grid">
-                <div class="spettanza-item">
-                    <label for="spettanza-ferie">Ferie</label>
-                    <input type="number" id="spettanza-ferie" value="25">
-                </div>
-                <div class="spettanza-item">
-                    <label for="spettanza-festivita">Festività soppresse</label>
-                    <input type="number" id="spettanza-festivita" value="4">
-                </div>
-                <div class="spettanza-item">
-                    <label for="spettanza-pir">PIR</label>
-                    <input type="number" id="spettanza-pir" value="2">
-                </div>
-                <div class="spettanza-item">
-                    <label for="spettanza-smonetizzazione">Smonetizzazione</label>
-                    <input type="number" id="spettanza-smonetizzazione" value="1">
-                </div>
-            </div>
-            <div class="spettanza-total">
-                Totale giorni disponibili: <span id="total-spettanza">32</span>
-            </div>
+        <div class="year-config" id="config-area">
+            <label>Anno di Riferimento (Start):</label>
+            <input type="number" id="base-year-input" style="width: 80px; padding: 5px;" min="2020" max="2050">
+            <button class="btn" id="update-year-btn">Aggiorna</button>
         </div>
 
-        <!-- SEZIONE CONSUNTIVAZIONE -->
-        <div class="section">
-            <h2>Consuntivazione</h2>
-            <div class="summary-grid">
-                <div class="summary-box">
-                    <h3>Giorni di assenza pianificati</h3>
-                    <ul id="summary-pianificati"></ul>
-                    <div id="summary-residui"></div>
+        <div class="main-grid">
+            <aside>
+                <div class="card">
+                    <h2><i class="fa-solid fa-scale-balanced"></i> Spettanze <span id="lbl-active-year"></span></h2>
+                    <div id="spettanze-container">
+                        </div>
+                    <div class="summary-item total">
+                        <span>Totale Disponibile</span>
+                        <span id="total-spettanze">0</span>
+                    </div>
                 </div>
-                <div class="summary-box">
-                    <h3>Giorni di assenza fruiti</h3>
-                    <div id="summary-fruiti-content"></div>
+
+                <div class="card">
+                    <h2><i class="fa-solid fa-chart-pie"></i> Riepilogo</h2>
+                    <div id="summary-dashboard">
+                        </div>
                 </div>
-            </div>
-        </div>
+            </aside>
 
-        <!-- SEZIONE PIANIFICAZIONE -->
-        <div class="section">
-            <h2>Pianificazione e Fruizione Giorni di Assenza</h2>
-            <button id="add-row-btn" class="btn">+ Aggiungi Giorno di Assenza</button>
-            <div class="table-container">
-                <table>
-                    <thead>
-                        <tr>
-                            <th data-sort="data">Data</th>
-                            <th>Giorno</th>
-                            <th data-sort="tipo">Tipologia</th>
-                            <th class="col-center">Fruito</th>
-                            <th class="col-center">Azione</th>
-                        </tr>
-                    </thead>
-                    <tbody id="absence-table-body"></tbody>
-                </table>
-            </div>
-        </div>
-        
-        <!-- SEZIONE GESTIONE DATI -->
-        <div class="section">
-            <h2>Gestione Dati</h2>
-            <div class="data-management">
-                <button id="export-excel-btn" class="btn btn-secondary">Esporta Excel</button>
-                <button id="import-excel-btn" class="btn btn-secondary">Importa Excel</button>
-                <button id="reset-data-btn" class="btn btn-danger">Resetta Pianificazione</button>
-                <input type="file" id="import-file-input" accept=".xlsx, .xls">
-            </div>
-        </div>
+            <main>
+                <div class="card">
+                    <h2><i class="fa-solid fa-calendar-plus"></i> Nuova Pianificazione</h2>
+                    <div class="input-bar">
+                        <div class="input-group">
+                            <label>Data</label>
+                            <input type="date" id="new-date">
+                        </div>
+                        <div class="input-group">
+                            <label>Tipologia</label>
+                            <select id="new-type">
+                                <option value="ferie">Ferie</option>
+                                <option value="festivita">Festività soppresse</option>
+                                <option value="pir">PIR</option>
+                                <option value="smonetizzazione">Smonetizzazione</option>
+                            </select>
+                        </div>
+                        <button id="btn-add-record" class="btn-add" disabled>
+                            <i class="fa-solid fa-plus"></i> Aggiungi
+                        </button>
+                    </div>
+                    <div id="validation-msg" style="color: var(--danger); font-size: 0.9rem; margin-top: -15px; margin-bottom: 15px; display: none;"></div>
 
+                    <h2><i class="fa-solid fa-list-check"></i> Elenco Assenze</h2>
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>Data</th>
+                                    <th>Giorno</th>
+                                    <th>Tipo</th>
+                                    <th style="text-align: center">Fruito</th>
+                                    <th style="text-align: right">Azioni</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body">
+                                </tbody>
+                        </table>
+                    </div>
+                    <div id="empty-state" style="text-align: center; padding: 40px; color: var(--text-muted); display: none;">
+                        Nessuna assenza pianificata per questo anno.
+                    </div>
+                </div>
+
+                <div class="actions-bar">
+                    <button id="btn-export" class="btn"><i class="fa-solid fa-file-excel" style="color: green"></i> Esporta Excel</button>
+                    <button id="btn-import" class="btn"><i class="fa-solid fa-file-import"></i> Importa Excel</button>
+                    <input type="file" id="file-input" accept=".xlsx, .xls" hidden>
+                    <div style="flex-grow: 1"></div>
+                    <button id="btn-reset-year" class="btn btn-outline-danger"><i class="fa-solid fa-trash"></i> Resetta Anno Corrente</button>
+                </div>
+            </main>
+        </div>
     </div>
 
     <script>
-    document.addEventListener('DOMContentLoaded', () => {
-        // --- STATO DELL'APPLICAZIONE ---
-        let appData = {
-            spettanze: {
-                ferie: 25,
-                festivita: 4,
-                pir: 2,
-                smonetizzazione: 1
-            },
-            assenze: [] // { id, data, tipo, fruito }
-        };
-
-        const tipiAssenza = {
-            ferie: 'Ferie',
-            festivita: 'Festività soppresse',
-            pir: 'PIR',
-            smonetizzazione: 'Smonetizzazione'
-        };
-        const tipiAssenzaReverse = Object.fromEntries(Object.entries(tipiAssenza).map(([key, value]) => [value, key]));
-        
-        let sortState = { key: 'data', ascending: true };
-
-        // --- RIFERIMENTI AL DOM ---
-        const spettanzeInputs = {
-            ferie: document.getElementById('spettanza-ferie'),
-            festivita: document.getElementById('spettanza-festivita'),
-            pir: document.getElementById('spettanza-pir'),
-            smonetizzazione: document.getElementById('spettanza-smonetizzazione'),
-        };
-        const totalSpettanzaEl = document.getElementById('total-spettanza');
-        const summaryPianificatiEl = document.getElementById('summary-pianificati');
-        const summaryResiduiEl = document.getElementById('summary-residui');
-        const summaryFruitiContentEl = document.getElementById('summary-fruiti-content');
-        const addRowBtn = document.getElementById('add-row-btn');
-        const tableBody = document.getElementById('absence-table-body');
-        const tableHeaders = document.querySelectorAll('th[data-sort]');
-        const exportBtn = document.getElementById('export-excel-btn');
-        const importBtn = document.getElementById('import-excel-btn');
-        const importFileInput = document.getElementById('import-file-input');
-        const resetBtn = document.getElementById('reset-data-btn');
-        
-        // --- FUNZIONI PRINCIPALI ---
-        function initializeApp() {
-            const savedData = localStorage.getItem('consuntivazioneApp');
-            if (savedData) {
-                appData = JSON.parse(savedData);
+        // --- CONFIGURAZIONE E STATO ---
+        const CONFIG = {
+            storageKey: 'ferieApp_v2',
+            festivitaFisse: ['01-01', '01-06', '04-25', '05-01', '06-02', '08-15', '11-01', '12-08', '12-25', '12-26'],
+            tipi: {
+                ferie: 'Ferie',
+                festivita: 'Festività soppresse',
+                pir: 'PIR',
+                smonetizzazione: 'Smonetizzazione'
             }
-            renderAll();
+        };
+
+        // Struttura Dati Principale
+        let appState = {
+            baseYear: new Date().getFullYear(),
+            // I dati sono salvati per anno: { 2024: { spettanze: {...}, assenze: [...] }, 2025: ... }
+            yearsData: {}
+        };
+
+        let currentViewYear = null; // Anno attualmente visualizzato nel tab
+
+        // --- INIZIALIZZAZIONE ---
+        document.addEventListener('DOMContentLoaded', () => {
+            loadData();
+            initUI();
+        });
+
+        function initUI() {
+            // Setup Tab Base Year
+            document.getElementById('base-year-input').value = appState.baseYear;
+            currentViewYear = appState.baseYear;
+
+            renderTabs();
+            renderYearView();
+
+            // Event Listeners Globali
+            document.getElementById('update-year-btn').addEventListener('click', updateBaseYear);
+            document.getElementById('new-date').addEventListener('input', validateInput);
+            document.getElementById('new-type').addEventListener('change', validateInput);
+            document.getElementById('btn-add-record').addEventListener('click', addRecord);
+            document.getElementById('btn-export').addEventListener('click', exportExcel);
+            document.getElementById('btn-import').addEventListener('click', () => document.getElementById('file-input').click());
+            document.getElementById('file-input').addEventListener('change', importExcel);
+            document.getElementById('btn-reset-year').addEventListener('click', resetCurrentYear);
+        }
+
+        // --- GESTIONE DATI (LOAD/SAVE/MIGRATE) ---
+        function loadData() {
+            const raw = localStorage.getItem(CONFIG.storageKey);
+            if (raw) {
+                appState = JSON.parse(raw);
+            } else {
+                // Tenta migrazione dalla vecchia versione
+                const oldData = localStorage.getItem('consuntivazioneApp');
+                if (oldData) {
+                    migrateData(JSON.parse(oldData));
+                } else {
+                    // Init vuoto per anno corrente e successivo
+                    ensureYearInitialized(appState.baseYear);
+                    ensureYearInitialized(appState.baseYear + 1);
+                }
+            }
         }
 
         function saveData() {
-            localStorage.setItem('consuntivazioneApp', JSON.stringify(appData));
+            localStorage.setItem(CONFIG.storageKey, JSON.stringify(appState));
         }
 
-        function renderAll() {
-            renderSpettanze();
-            sortData();
-            renderTable();
-            renderSummary();
+        function ensureYearInitialized(year) {
+            if (!appState.yearsData[year]) {
+                appState.yearsData[year] = {
+                    spettanze: { ferie: 25, festivita: 4, pir: 2, smonetizzazione: 1 },
+                    assenze: []
+                };
+            }
+        }
+
+        function migrateData(oldData) {
+            console.log("Migrazione dati vecchia versione...");
+            const year = appState.baseYear;
+            ensureYearInitialized(year);
+            
+            // Copia spettanze
+            if(oldData.spettanze) appState.yearsData[year].spettanze = oldData.spettanze;
+            
+            // Copia assenze
+            if(oldData.assenze && Array.isArray(oldData.assenze)) {
+                appState.yearsData[year].assenze = oldData.assenze.map(a => ({
+                    id: a.id || Date.now() + Math.random(),
+                    data: a.data,
+                    tipo: a.tipo,
+                    fruito: a.fruito
+                })).filter(a => a.data && a.data.startsWith(year)); // Prende solo quelle dell'anno base
+            }
             saveData();
         }
 
-        function renderSpettanze() {
-            for (const key in spettanzeInputs) {
-                spettanzeInputs[key].value = appData.spettanze[key];
+        // --- LOGICA DI RENDERIZZAZIONE ---
+        function updateBaseYear() {
+            const val = parseInt(document.getElementById('base-year-input').value);
+            if (val && val > 2000) {
+                appState.baseYear = val;
+                ensureYearInitialized(val);
+                ensureYearInitialized(val + 1);
+                currentViewYear = val;
+                saveData();
+                renderTabs();
+                renderYearView();
             }
-            const total = Object.values(appData.spettanze).reduce((sum, val) => sum + Number(val || 0), 0);
-            totalSpettanzaEl.textContent = total;
         }
-        
-        function renderSummary() {
-            const pianificati = {}, fruiti = {};
-            for (const key in tipiAssenza) {
-                pianificati[key] = 0;
-                fruiti[key] = 0;
-            }
 
-            appData.assenze.forEach(assenza => {
-                if (assenza.tipo) {
-                    pianificati[assenza.tipo]++;
-                    if (assenza.fruito) fruiti[assenza.tipo]++;
-                }
+        function renderTabs() {
+            const container = document.getElementById('year-tabs-container');
+            container.innerHTML = '';
+            
+            [appState.baseYear, appState.baseYear + 1].forEach(year => {
+                const btn = document.createElement('button');
+                btn.className = `year-tab ${year === currentViewYear ? 'active' : ''}`;
+                btn.textContent = year;
+                btn.onclick = () => {
+                    currentViewYear = year;
+                    renderTabs();
+                    renderYearView();
+                };
+                container.appendChild(btn);
+            });
+        }
+
+        function renderYearView() {
+            ensureYearInitialized(currentViewYear);
+            document.getElementById('lbl-active-year').textContent = currentViewYear;
+            
+            renderSpettanzeInputs();
+            renderTable();
+            renderSummary();
+            
+            // Reset form inserimento
+            document.getElementById('new-date').value = '';
+            validateInput();
+        }
+
+        function renderSpettanzeInputs() {
+            const container = document.getElementById('spettanze-container');
+            container.innerHTML = '';
+            const data = appState.yearsData[currentViewYear].spettanze;
+
+            Object.keys(CONFIG.tipi).forEach(key => {
+                const div = document.createElement('div');
+                div.className = 'spettanza-row';
+                div.innerHTML = `
+                    <label>${CONFIG.tipi[key]}</label>
+                    <input type="number" value="${data[key]}" onchange="updateSpettanza('${key}', this.value)">
+                `;
+                container.appendChild(div);
             });
 
-            const totalPianificati = Object.values(pianificati).reduce((a, b) => a + b, 0);
-            const totalFruiti = Object.values(fruiti).reduce((a, b) => a + b, 0);
-            const totalSpettanze = Object.values(appData.spettanze).reduce((a, b) => a + Number(b), 0);
-
-            // Blocco 1: Pianificati e Residui da Pianificare
-            let pianificatiHTML = '';
-            for (const key in tipiAssenza) {
-                pianificatiHTML += `<li><span>${tipiAssenza[key]}</span> <span>${pianificati[key]}</span></li>`;
-            }
-            pianificatiHTML += `<li class="total"><span>Totale Pianificati</span> <span>${totalPianificati}</span></li>`;
-            summaryPianificatiEl.innerHTML = pianificatiHTML;
-            
-            let residuiPianificareHTML = '<ul>';
-            for (const key in tipiAssenza) {
-                const residuo = appData.spettanze[key] - pianificati[key];
-                const residuoClass = residuo < 0 ? 'class="negative"' : '';
-                residuiPianificareHTML += `<li><span>Residuo ${tipiAssenza[key]}</span> <span ${residuoClass}>${residuo}</span></li>`;
-            }
-            const totalResiduoPianificare = totalSpettanze - totalPianificati;
-            const totalResiduoPianificareClass = totalResiduoPianificare < 0 ? 'class="negative"' : '';
-            residuiPianificareHTML += `<li class="total"><span>Totale Residuo da pianificare</span> <span ${totalResiduoPianificareClass}>${totalResiduoPianificare}</span></li></ul>`;
-            summaryResiduiEl.innerHTML = residuiPianificareHTML;
-
-            // Blocco 2: Fruiti e Residui da Fruire
-            let fruitiBreakdownHTML = '<ul>';
-            for (const key in tipiAssenza) {
-                fruitiBreakdownHTML += `<li><span>${tipiAssenza[key]}</span> <span>${fruiti[key]}</span></li>`;
-            }
-            fruitiBreakdownHTML += `<li class="total"><span>Totale Fruiti</span> <span>${totalFruiti}</span></li></ul>`;
-
-            let residuiFruireHTML = '<ul>';
-            for (const key in tipiAssenza) {
-                const residuoFruire = appData.spettanze[key] - fruiti[key];
-                const residuoClass = residuoFruire < 0 ? 'class="negative"' : '';
-                residuiFruireHTML += `<li><span>Residuo ${tipiAssenza[key]}</span> <span ${residuoClass}>${residuoFruire}</span></li>`;
-            }
-            const totalResiduoFruire = totalSpettanze - totalFruiti;
-            const totalResiduoFruireClass = totalResiduoFruire < 0 ? 'class="negative"' : '';
-            residuiFruireHTML += `<li class="total"><span>Totale Residuo da fruire</span> <span ${totalResiduoFruireClass}>${totalResiduoFruire}</span></li></ul>`;
-            
-            summaryFruitiContentEl.innerHTML = fruitiBreakdownHTML + residuiFruireHTML;
+            const total = Object.values(data).reduce((a, b) => a + Number(b), 0);
+            document.getElementById('total-spettanze').textContent = total;
         }
 
         function renderTable() {
-            tableBody.innerHTML = '';
-            appData.assenze.forEach(assenza => {
-                const row = document.createElement('tr');
-                row.dataset.id = assenza.id;
-                const dayOfWeek = assenza.data ? getDayOfWeek(assenza.data) : '';
-                row.innerHTML = `
-                    <td><input type="date" class="date-input" value="${assenza.data || ''}"></td>
-                    <td>${dayOfWeek}</td>
-                    <td>
-                        <select class="type-select">
-                            <option value="">Seleziona tipo...</option>
-                            ${Object.keys(tipiAssenza).map(key => `<option value="${key}" ${assenza.tipo === key ? 'selected' : ''}>${tipiAssenza[key]}</option>`).join('')}
-                        </select>
-                    </td>
-                    <td class="col-center"><input type="checkbox" class="fruito-check" ${assenza.fruito ? 'checked' : ''}></td>
-                    <td class="col-center"><button class="delete-btn">Elimina</button></td>
-                `;
-                tableBody.appendChild(row);
-            });
-        }
-        
-        function sortData() {
-            appData.assenze.sort((a, b) => {
-                const valA = a[sortState.key] || '';
-                const valB = b[sortState.key] || '';
-                let comparison = 0;
-                if (valA > valB) comparison = 1;
-                else if (valA < valB) comparison = -1;
-                return sortState.ascending ? comparison : comparison * -1;
-            });
-        }
-
-        // --- GESTORI DI EVENTI ---
-        Object.values(spettanzeInputs).forEach(input => {
-            input.addEventListener('input', (e) => {
-                const key = e.target.id.replace('spettanza-', '');
-                appData.spettanze[key] = parseInt(e.target.value, 10) || 0;
-                renderAll();
-            });
-        });
-
-        addRowBtn.addEventListener('click', () => {
-            appData.assenze.push({ id: Date.now(), data: '', tipo: 'ferie', fruito: false });
-            renderAll();
-        });
-
-        tableBody.addEventListener('change', (e) => {
-            const row = e.target.closest('tr');
-            if (!row) return;
-            const id = Number(row.dataset.id);
-            const assenza = appData.assenze.find(a => a.id === id);
+            const tbody = document.getElementById('table-body');
+            tbody.innerHTML = '';
+            const list = appState.yearsData[currentViewYear].assenze;
             
-            if (e.target.classList.contains('date-input')) {
-                const newDate = e.target.value;
-                if (newDate && appData.assenze.some(a => a.data === newDate && a.id !== id)) {
-                    alert('Questa data è già stata inserita. Selezionane un\'altra.');
-                    e.target.value = assenza.data; 
-                    return; 
-                }
-                assenza.data = newDate;
-            } else if (e.target.classList.contains('type-select')) {
-                assenza.tipo = e.target.value;
-            } else if (e.target.classList.contains('fruito-check')) {
-                assenza.fruito = e.target.checked;
+            // Ordina per data
+            list.sort((a, b) => a.data.localeCompare(b.data));
+
+            if (list.length === 0) {
+                document.getElementById('empty-state').style.display = 'block';
+                return;
+            } else {
+                document.getElementById('empty-state').style.display = 'none';
             }
-            renderAll();
-        });
-        
-        tableBody.addEventListener('click', (e) => {
-             if (e.target.classList.contains('delete-btn')) {
-                const row = e.target.closest('tr');
-                const id = Number(row.dataset.id);
-                appData.assenze = appData.assenze.filter(a => a.id !== id);
-                renderAll();
-            }
-        });
-        
-        tableHeaders.forEach(header => {
-            header.addEventListener('click', () => {
-                const key = header.dataset.sort;
-                if(!key) return;
-                if (sortState.key === key) sortState.ascending = !sortState.ascending;
-                else {
-                    sortState.key = key;
-                    sortState.ascending = true;
-                }
-                renderAll();
+
+            list.forEach(item => {
+                const tr = document.createElement('tr');
+                const dateObj = new Date(item.data);
+                const dayName = dateObj.toLocaleDateString('it-IT', { weekday: 'long' });
+                
+                tr.innerHTML = `
+                    <td>${dateObj.toLocaleDateString('it-IT')}</td>
+                    <td style="text-transform: capitalize">${dayName}</td>
+                    <td>${CONFIG.tipi[item.tipo]}</td>
+                    <td style="text-align: center">
+                        <i class="fa-solid ${item.fruito ? 'fa-circle-check active' : 'fa-circle'} status-toggle" 
+                           onclick="toggleFruito(${item.id})"></i>
+                    </td>
+                    <td style="text-align: right">
+                        <button class="btn-del" onclick="deleteRecord(${item.id})"><i class="fa-solid fa-trash"></i></button>
+                    </td>
+                `;
+                tbody.appendChild(tr);
             });
-        });
-        
-        resetBtn.addEventListener('click', () => {
-            if (confirm("Sei sicuro di voler eliminare tutti i giorni di assenza pianificati e fruiti? I valori di spettanza non verranno modificati. L'azione è irreversibile.")) {
-                appData.assenze = [];
-                renderAll();
-                alert('La pianificazione è stata resettata.');
-            }
-        });
+        }
 
-        // --- GESTIONE DATI EXCEL ---
-        exportBtn.addEventListener('click', () => {
-            try {
-                const pianificazioneData = appData.assenze.map(assenza => ({
-                    Data: assenza.data ? new Date(assenza.data) : null, 
-                    Giorno: assenza.data ? getDayOfWeek(assenza.data) : '',
-                    Tipologia: assenza.tipo ? tipiAssenza[assenza.tipo] : '',
-                    Fruito: assenza.fruito ? 'Si' : 'No'
-                }));
-                const pianificazioneSheet = XLSX.utils.json_to_sheet(pianificazioneData, { cellDates: true });
+        function renderSummary() {
+            const container = document.getElementById('summary-dashboard');
+            const data = appState.yearsData[currentViewYear];
+            const spettanze = data.spettanze;
+            const assenze = data.assenze;
 
-                if (appData.assenze.length > 0) {
-                    const range = XLSX.utils.decode_range(pianificazioneSheet['!ref']);
-                    for (let i = range.s.r + 1; i <= range.e.r; ++i) {
-                        const cell_ref = XLSX.utils.encode_cell({ c: 0, r: i });
-                        if (pianificazioneSheet[cell_ref] && pianificazioneSheet[cell_ref].t === 'd') { // Controlla se è una data
-                            pianificazioneSheet[cell_ref].z = 'dd/mm/yyyy';
-                        }
+            // Calcoli
+            const counts = { pianificati: 0, fruiti: 0 };
+            const byType = {};
+            
+            Object.keys(CONFIG.tipi).forEach(k => byType[k] = { pianificati: 0, fruiti: 0 });
+
+            assenze.forEach(a => {
+                if(byType[a.tipo]) {
+                    byType[a.tipo].pianificati++;
+                    counts.pianificati++;
+                    if(a.fruito) {
+                        byType[a.tipo].fruito++;
+                        counts.fruiti++;
                     }
                 }
+            });
 
-                const spettanzeData = Object.entries(appData.spettanze).map(([key, value]) => ({
-                    'Tipologia di Spettanza': tipiAssenza[key],
-                    'Giorni': value
-                }));
-                const spettanzeSheet = XLSX.utils.json_to_sheet(spettanzeData);
-                
-                const wb = XLSX.utils.book_new();
-                XLSX.utils.book_append_sheet(wb, pianificazioneSheet, "Pianificazione");
-                XLSX.utils.book_append_sheet(wb, spettanzeSheet, "Spettanze");
+            let html = '';
+            
+            // Dettaglio per tipo (Residui)
+            Object.keys(CONFIG.tipi).forEach(key => {
+                const residuo = spettanze[key] - byType[key].pianificati;
+                const badgeClass = residuo >= 0 ? 'bg-ok' : 'bg-warn';
+                html += `
+                    <div class="summary-item">
+                        <span>${CONFIG.tipi[key]}</span>
+                        <div>
+                            <small class="text-muted">Pian: ${byType[key].pianificati}</small>
+                            <span class="badge-residuo ${badgeClass}">Res: ${residuo}</span>
+                        </div>
+                    </div>
+                `;
+            });
 
-                XLSX.writeFile(wb, "consuntivazione_assenze.xlsx");
+            // Totali Generali
+            const totSpettanze = Object.values(spettanze).reduce((a,b)=>a+Number(b),0);
+            const totResiduo = totSpettanze - counts.pianificati;
+            
+            html += `
+                <div class="summary-item total">
+                    <span>Totale Pianificati</span>
+                    <span>${counts.pianificati}</span>
+                </div>
+                 <div class="summary-item total">
+                    <span>Totale Fruiti</span>
+                    <span>${counts.fruiti}</span>
+                </div>
+                <div class="summary-item total" style="color: ${totResiduo >= 0 ? 'var(--primary-dark)' : 'var(--danger)'}">
+                    <span>Residuo Totale da Pianificare</span>
+                    <span>${totResiduo}</span>
+                </div>
+            `;
 
-            } catch(error) {
-                console.error("Errore durante l'esportazione:", error);
-                alert("Si è verificato un errore durante la creazione del file Excel. Controlla la console per maggiori dettagli.");
+            container.innerHTML = html;
+        }
+
+        // --- AZIONI UTENTE ---
+        function updateSpettanza(key, value) {
+            appState.yearsData[currentViewYear].spettanze[key] = Number(value);
+            saveData();
+            renderSpettanzeInputs(); // aggiorna totale
+            renderSummary();
+        }
+
+        function validateInput() {
+            const dateInput = document.getElementById('new-date');
+            const addBtn = document.getElementById('btn-add-record');
+            const msgBox = document.getElementById('validation-msg');
+            const dateVal = dateInput.value;
+
+            msgBox.style.display = 'none';
+            addBtn.disabled = true;
+
+            if (!dateVal) return;
+
+            const dateObj = new Date(dateVal);
+            const year = dateObj.getFullYear();
+            const day = dateObj.getDay(); // 0 Dom, 6 Sab
+            const dayMonth = dateVal.slice(5); // MM-DD
+
+            // Controllo 1: Anno congruente col tab
+            if (year !== currentViewYear) {
+                msgBox.textContent = `Attenzione: Stai visualizzando il ${currentViewYear}, ma hai selezionato una data del ${year}. Cambia Tab o data.`;
+                msgBox.style.display = 'block';
+                return;
             }
-        });
 
-        importBtn.addEventListener('click', () => importFileInput.click());
+            // Controllo 2: Sabato o Domenica
+            if (day === 0 || day === 6) {
+                msgBox.textContent = "Non è possibile pianificare ferie di Sabato o Domenica.";
+                msgBox.style.display = 'block';
+                return;
+            }
 
-        importFileInput.addEventListener('change', (e) => {
-            const file = e.target.files[0];
+            // Controllo 3: Festività Fissa
+            if (CONFIG.festivitaFisse.includes(dayMonth)) {
+                msgBox.textContent = "Data non selezionabile: è una festività nazionale.";
+                msgBox.style.display = 'block';
+                return;
+            }
+
+            // Controllo 4: Duplicati
+            const exists = appState.yearsData[currentViewYear].assenze.some(a => a.data === dateVal);
+            if (exists) {
+                msgBox.textContent = "Esiste già una pianificazione per questa data.";
+                msgBox.style.display = 'block';
+                return;
+            }
+
+            addBtn.disabled = false;
+        }
+
+        function addRecord() {
+            const dateVal = document.getElementById('new-date').value;
+            const typeVal = document.getElementById('new-type').value;
+
+            if (!dateVal) return;
+
+            appState.yearsData[currentViewYear].assenze.push({
+                id: Date.now(),
+                data: dateVal,
+                tipo: typeVal,
+                fruito: false
+            });
+
+            saveData();
+            renderYearView();
+        }
+
+        function deleteRecord(id) {
+            if(confirm('Eliminare questa voce?')) {
+                appState.yearsData[currentViewYear].assenze = 
+                    appState.yearsData[currentViewYear].assenze.filter(a => a.id !== id);
+                saveData();
+                renderYearView();
+            }
+        }
+
+        function toggleFruito(id) {
+            const item = appState.yearsData[currentViewYear].assenze.find(a => a.id === id);
+            if(item) {
+                item.fruito = !item.fruito;
+                saveData();
+                renderTable();
+                renderSummary();
+            }
+        }
+
+        function resetCurrentYear() {
+            if(confirm(`Sei sicuro di voler CANCELLARE TUTTE le pianificazioni del ${currentViewYear}? Le spettanze rimarranno invariate.`)) {
+                appState.yearsData[currentViewYear].assenze = [];
+                saveData();
+                renderYearView();
+            }
+        }
+
+        // --- EXPORT / IMPORT EXCEL ---
+        function exportExcel() {
+            try {
+                const wb = XLSX.utils.book_new();
+
+                // 1. Creazione Sheet Dati (tutti gli anni o solo corrente? Esportiamo tutto per backup, ma filtriamo nel nome)
+                // Creiamo un foglio unico con tutti i dati storici, ma ordinati
+                const allRows = [];
+                
+                // Iteriamo sugli anni gestiti
+                Object.keys(appState.yearsData).sort().forEach(year => {
+                    const data = appState.yearsData[year];
+                    data.assenze.forEach(a => {
+                        allRows.push({
+                            'Anno Riferimento': year,
+                            'Data': a.data, // Stringa YYYY-MM-DD
+                            'Giorno': new Date(a.data).toLocaleDateString('it-IT', {weekday: 'long'}),
+                            'Tipologia': CONFIG.tipi[a.tipo],
+                            'Stato': a.fruito ? 'Fruito' : 'Pianificato'
+                        });
+                    });
+                });
+
+                // Ordine cronologico
+                allRows.sort((a,b) => a.Data.localeCompare(b.Data));
+
+                const wsData = XLSX.utils.json_to_sheet(allRows);
+                XLSX.utils.book_append_sheet(wb, wsData, "Diario Assenze");
+
+                // 2. Creazione Sheet Spettanze
+                const spettanzeRows = [];
+                Object.keys(appState.yearsData).sort().forEach(year => {
+                    const s = appState.yearsData[year].spettanze;
+                    spettanzeRows.push({
+                        'Anno': year,
+                        'Ferie': s.ferie,
+                        'Festività': s.festivita,
+                        'PIR': s.pir,
+                        'Smonetizzazione': s.smonetizzazione
+                    });
+                });
+                const wsSpettanze = XLSX.utils.json_to_sheet(spettanzeRows);
+                XLSX.utils.book_append_sheet(wb, wsSpettanze, "Spettanze");
+
+                // Naming file: PianoFerie_ANNO_DATA.xlsx
+                const today = new Date().toISOString().slice(0,10).replace(/-/g, '');
+                const fileName = `PianoFerie_${appState.baseYear}_${today}.xlsx`;
+
+                XLSX.writeFile(wb, fileName);
+
+            } catch (e) {
+                alert("Errore export: " + e.message);
+            }
+        }
+
+        function importExcel() {
+            const file = document.getElementById('file-input').files[0];
             if (!file) return;
 
             const reader = new FileReader();
-            reader.onload = (event) => {
+            reader.onload = (e) => {
                 try {
-                    const data = event.target.result;
-                    const workbook = XLSX.read(data, { type: 'binary', cellDates: true });
+                    const data = new Uint8Array(e.target.result);
+                    const workbook = XLSX.read(data, { type: 'array' });
 
-                    if (!workbook.SheetNames.includes("Pianificazione") || !workbook.SheetNames.includes("Spettanze")) {
-                        throw new Error("Il file Excel deve contenere i fogli 'Pianificazione' e 'Spettanze'.");
-                    }
-                    
-                    if (!confirm("Trovati dati validi. Vuoi sostituire tutti i dati attuali con quelli del file?")) {
-                         importFileInput.value = '';
-                         return;
-                    }
+                    // Logica semplificata: Cerchiamo sheet "Diario Assenze" o "Pianificazione"
+                    let sheetName = workbook.SheetNames.find(n => n.includes("Assenze") || n.includes("Pianificazione"));
+                    if (!sheetName) throw new Error("Foglio dati non trovato");
 
-                    const spettanzeSheet = workbook.Sheets["Spettanze"];
-                    const spettanzeJson = XLSX.utils.sheet_to_json(spettanzeSheet);
+                    const rows = XLSX.utils.sheet_to_json(workbook.Sheets[sheetName]);
                     
-                    const newSpettanze = {};
-                    spettanzeJson.forEach(row => {
-                        const tipoKey = tipiAssenzaReverse[row['Tipologia di Spettanza']];
-                        if (tipoKey) {
-                            newSpettanze[tipoKey] = Number(row['Giorni']);
+                    if(!confirm(`Trovati ${rows.length} record. Questo sovrascriverà i dati attuali. Continuare?`)) return;
+
+                    // Reset soft
+                    appState.yearsData = {}; 
+
+                    rows.forEach(row => {
+                        // Supporto importazione vecchio formato (dove Data era oggetto data Excel) o nuovo (Stringa)
+                        let dateStr = row['Data'];
+                        if (typeof dateStr !== 'string') {
+                            // Tentativo conversione data Excel
+                            // (SheetJS di solito gestisce date se option cellDates: true non è usato nel read, ma qui usiamo raw)
+                             // Se è numero seriale Excel, è complicato senza cellDates, ma proviamo string parsing base
+                             // Assumiamo che l'utente stia re-importando un file esportato da questa app
+                        }
+                        
+                        // Normalizza data YYYY-MM-DD
+                        if(row['Data'] && row['Data'].match(/^\d{4}-\d{2}-\d{2}$/)) {
+                            dateStr = row['Data'];
+                        } 
+                        
+                        if (dateStr) {
+                            const y = dateStr.slice(0, 4);
+                            ensureYearInitialized(Number(y));
+                            
+                            // Mappa inversa Tipologia
+                            let typeKey = 'ferie';
+                            const tVal = row['Tipologia'] || row['Tipologia di Spettanza']; // Compatibilità
+                            Object.entries(CONFIG.tipi).forEach(([k, v]) => {
+                                if(v === tVal) typeKey = k;
+                            });
+
+                            const isFruito = (row['Stato'] === 'Fruito') || (String(row['Fruito']).toLowerCase() === 'si');
+
+                            appState.yearsData[y].assenze.push({
+                                id: Date.now() + Math.random(),
+                                data: dateStr,
+                                tipo: typeKey,
+                                fruito: isFruito
+                            });
                         }
                     });
-                    appData.spettanze = newSpettanze;
 
-                    const pianificazioneSheet = workbook.Sheets["Pianificazione"];
-                    const pianificazioneJson = XLSX.utils.sheet_to_json(pianificazioneSheet);
+                    // Recupero spettanze se presenti
+                    const spSheet = workbook.SheetNames.find(n => n.includes("Spettanze"));
+                    if(spSheet) {
+                        const spRows = XLSX.utils.sheet_to_json(workbook.Sheets[spSheet]);
+                        spRows.forEach(row => {
+                            if(row['Anno']) {
+                                ensureYearInitialized(row['Anno']);
+                                appState.yearsData[row['Anno']].spettanze = {
+                                    ferie: row['Ferie'] || 0,
+                                    festivita: row['Festività'] || 0,
+                                    pir: row['PIR'] || 0,
+                                    smonetizzazione: row['Smonetizzazione'] || 0
+                                };
+                            }
+                        });
+                    }
 
-                    const newAssenze = pianificazioneJson.map((row, index) => {
-                        let dataValue = '';
-                        // ======================================================================================
-                        // --- INIZIO BLOCCO MODIFICATO PER CORREZIONE DATA ---
-                        // ======================================================================================
-                        // Controlla che la data esista e sia un oggetto Date valido
-                        if (row.Data instanceof Date && !isNaN(row.Data)) {
-                            const date = row.Data;
-                            // Correzione fuso orario: l'offset viene sottratto per neutralizzare 
-                            // la conversione automatica del browser e mantenere la data originale del file.
-                            date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
-                            dataValue = date.toISOString().split('T')[0];
-                        }
-                        // ======================================================================================
-                        // --- FINE BLOCCO MODIFICATO ---
-                        // ======================================================================================
-                        
-                        return {
-                            id: Date.now() + index,
-                            data: dataValue,
-                            tipo: tipiAssenzaReverse[row.Tipologia] || '',
-                            fruito: String(row.Fruito).toLowerCase() === 'si'
-                        }
-                    }).filter(a => a.data); // Filtra eventuali righe senza una data valida
-                    appData.assenze = newAssenze;
+                    // Aggiorna baseYear in base ai dati importati (il più recente)
+                    const years = Object.keys(appState.yearsData).map(Number).sort((a,b)=>b-a);
+                    if(years.length > 0) {
+                        appState.baseYear = years.includes(new Date().getFullYear()) ? new Date().getFullYear() : years[0];
+                    }
 
-                    renderAll();
-                    alert('Dati importati con successo!');
+                    saveData();
+                    initUI();
+                    alert("Importazione completata!");
 
-                } catch (error) {
-                    console.error("Errore durante l'importazione:", error);
-                    alert("Errore nell'importazione: " + error.message);
+                } catch (err) {
+                    console.error(err);
+                    alert("Errore importazione: " + err.message);
                 } finally {
-                    importFileInput.value = '';
+                    document.getElementById('file-input').value = '';
                 }
             };
-            reader.readAsBinaryString(file);
-        });
-
-        // --- FUNZIONI DI UTILITÀ ---
-        function getDayOfWeek(dateString) {
-            if (!dateString) return '';
-            const [year, month, day] = dateString.split('-').map(Number);
-            const date = new Date(year, month - 1, day);
-            const dayName = date.toLocaleDateString('it-IT', { weekday: 'long' });
-            return dayName.charAt(0).toUpperCase() + dayName.slice(1);
+            reader.readAsArrayBuffer(file);
         }
 
-        // --- AVVIO APPLICAZIONE ---
-        initializeApp();
-    });
     </script>
 </body>
 </html>
