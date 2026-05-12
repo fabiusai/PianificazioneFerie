@@ -664,7 +664,7 @@
             appState.yearsData[currentViewYear].assenze = list.filter(a => a.data !== dateStr);
             saveData(); renderYearView(); closeModal();
         }
-        function exportExcel() {
+                function exportExcel() {
             try {
                 const wb = XLSX.utils.book_new();
                 const allRows = [];
@@ -676,7 +676,10 @@
                 allRows.sort((a,b) => a.Data.localeCompare(b.Data));
                 XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(allRows), "Diario Assenze");
                 const sRows = [];
-                Object.keys(appState.yearsData).sort().forEach(year => sRows.push({ 'Anno': year, ...appState.yearsData[year].spettanze }));
+                Object.keys(appState.yearsData).sort().forEach(year => {
+                    const sp = appState.yearsData[year].spettanze;
+                    sRows.push({ 'Anno': year, 'Ferie': sp.ferie, 'Festività': sp.festivita, 'PIR': sp.pir, 'Smonetizzazione': sp.smonetizzazione });
+                });
                 XLSX.utils.book_append_sheet(wb, XLSX.utils.json_to_sheet(sRows), "Spettanze");
                 XLSX.writeFile(wb, `PianoFerie_${appState.baseYear}_${new Date().toISOString().slice(0,10).replace(/-/g,'')}.xlsx`);
             } catch (e) { alert(e.message); }
@@ -706,7 +709,15 @@
                     const spSn = wb.SheetNames.find(n => n.includes("Spettanze"));
                     if(spSn) {
                         XLSX.utils.sheet_to_json(wb.Sheets[spSn]).forEach(r => {
-                            if(r['Anno']) { ensureYearInitialized(r['Anno']); appState.yearsData[r['Anno']].spettanze = { ferie: r['Ferie']||0, festivita: r['Festività']||0, pir: r['PIR']||0, smonetizzazione: r['Smonetizzazione']||0 }; }
+                            if(r['Anno']) { 
+                                ensureYearInitialized(r['Anno']); 
+                                appState.yearsData[r['Anno']].spettanze = { 
+                                    ferie: r['Ferie'] !== undefined ? Number(r['Ferie']) : 0, 
+                                    festivita: r['Festività'] !== undefined ? Number(r['Festività']) : 0, 
+                                    pir: r['PIR'] !== undefined ? Number(r['PIR']) : 0, 
+                                    smonetizzazione: r['Smonetizzazione'] !== undefined ? Number(r['Smonetizzazione']) : 0 
+                                }; 
+                            }
                         });
                     }
                     saveData(); initUI(); alert("Fatto!");
